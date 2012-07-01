@@ -1,15 +1,33 @@
-require File.expand_path("../acpc_dealer/version", __FILE__)
-
-require File.expand_path("../hand_evaluator", __FILE__)
+require File.expand_path('../hand_evaluator', __FILE__)
+require File.expand_path("../acpc_dealer/dealer_runner", __FILE__)
 
 module AcpcDealer
-  GAME_DEFINITION_FILE_NAMES = lambda do
-    path_to_project_acpc_server_directory = File.expand_path('../../ext/project_acpc_server', __FILE__)
+  DEALER_DIRECTORY = File.expand_path('../../vendor/project_acpc_server', __FILE__)
+  GAME_DEFINITION_FILE_PATHS =
+  {
+    two_player:
     {
-      holdem_limit_2p_reverse_blinds: "#{path_to_project_acpc_server_directory}/holdem.limit.2p.reverse_blinds.game",
-      holdem_no_limit_2p_reverse_blinds: "#{path_to_project_acpc_server_directory}/holdem.nolimit.2p.reverse_blinds.game",
-      holdem_limit_3p_reverse_blinds: "#{path_to_project_acpc_server_directory}/holdem.limit.3p.game",
-      holdem_no_limit_3p_reverse_blinds: "#{path_to_project_acpc_server_directory}/holdem.nolimit.3p.game"
+      limit: "#{DEALER_DIRECTORY}/holdem.limit.2p.reverse_blinds.game",
+      no_limit: "#{DEALER_DIRECTORY}/holdem.nolimit.2p.reverse_blinds.game"
+    },
+    three_player:
+    {
+      limit: "#{DEALER_DIRECTORY}/holdem.limit.3p.game",
+      no_limit: "#{DEALER_DIRECTORY}/holdem.nolimit.3p.game"
     }
-  end.call
+  }
+  DEALER_PATH = "#{DEALER_DIRECTORY}/dealer"
+  EXAMPLE_PLAYERS =
+  {
+    two_player:
+    {
+      limit: "#{DEALER_DIRECTORY}/example_player.limit.2p.sh",
+      no_limit: "#{DEALER_DIRECTORY}/example_player.nolimit.2p.sh"
+    },
+    three_player:
+    {
+      limit: "#{DEALER_DIRECTORY}/example_player.limit.3p.sh",
+      no_limit: "#{DEALER_DIRECTORY}/example_player.nolimit.3p.sh"
+    }
+  }
 end

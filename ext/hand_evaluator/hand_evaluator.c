@@ -3,8 +3,8 @@
 #include <ruby/io.h>
 
 // ACPC includes
-#include "../project_acpc_server/game.h"
-#include "../project_acpc_server/evalHandTables"
+#include "../../vendor/project_acpc_server/game.h"
+#include "../../vendor/project_acpc_server/evalHandTables"
 
 static VALUE cHandEvaluator;
 
