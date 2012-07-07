@@ -644,12 +644,6 @@ static int printFinalMessage( const Game *game, char *seatName[ MAX_PLAYERS ],
 			      const double totalValue[ MAX_PLAYERS ],
 			      FILE *logFile )
 {
-///////////
-  fprintf(logFile, "IN PRINT FINAL MESSAGE\n");
-  fflush(NULL);
-  fprintf(stderr, "IN PRINT FINAL MESSAGE\n");
-
-
   int c, r;
   uint8_t s;
   char line[ MAX_LINE_LEN ];
@@ -696,6 +690,7 @@ static int printFinalMessage( const Game *game, char *seatName[ MAX_PLAYERS ],
   fprintf( stderr, "%s\n", line );
 
   if( logFile ) {
+
     fprintf( logFile, "%s\n", line );
   }
 
@@ -882,20 +877,9 @@ static int gameLoop( const Game *game, char *seatName[ MAX_PLAYERS ],
   /* print out the final values */
   if( !quiet ) {
     gettimeofday( &t, NULL );
-    ///////////
-    fprintf(stderr, "FINISHED GAME LOOP BEFORE FINAL ACTION MESSAGE: %p\n", logFile);
-    fprintf(logFile, "FINISHED GAME LOOP BEFORE FINAL ACTION MESSAGE\n");
-
     fprintf( stderr, "FINISHED at %zu.%06zu\n",
 	     sendTime.tv_sec, sendTime.tv_usec );
   }
-
-  ///////////
-  fprintf(stderr, "FINISHED GAME LOOP BEFORE PRINT FINAL MESSAGE\n");
-  fprintf(logFile, "FINISHED GAME LOOP BEFORE PRINT FINAL MESSAGE\n");
-  fprintf(stderr, "FINISHED GAME LOOP BEFORE PRINT FINAL MESSAGE: 2\n");
-
-
   if( printFinalMessage( game, seatName, totalValue, logFile ) < 0 ) {
     /* error messages already handled in function */
 
@@ -1173,9 +1157,6 @@ int main( int argc, char **argv )
 
     logFile = NULL;
   }
-//////////////
-  fprintf( stderr, "OPENED LOG FILE: %p\n", logFile );
-  fprintf( logFile, "OPENED LOG FILE\n");
 
   if( useTransactionFile ) {
     /* create/open the transaction log */
@@ -1281,20 +1262,14 @@ int main( int argc, char **argv )
 		seatFD, readBuf, logFile, transactionFile ) < 0 ) {
     /* should have already printed an error message */
 
-    ///////////
-    fprintf(logFile, "EXITING GAME LOOP WITH FAILURE\n");
-
     exit( EXIT_FAILURE );
   }
-
-///////////
-  fprintf(logFile, "EXITING GAME LOOP\n");
 
   fflush( NULL );
   if( transactionFile != NULL ) {
     fclose( transactionFile );
   }
-  if( logFile != NULL ) {    
+  if( logFile != NULL ) {
     fclose( logFile );
   }
   free( game );
