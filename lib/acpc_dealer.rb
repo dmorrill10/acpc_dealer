@@ -5,29 +5,29 @@ module AcpcDealer
   DEALER_DIRECTORY = File.expand_path('../../vendor/project_acpc_server', __FILE__)
   GAME_DEFINITION_FILE_PATHS =
   {
-    two_player:
+    2 =>
     {
       limit: "#{DEALER_DIRECTORY}/holdem.limit.2p.reverse_blinds.game",
-      no_limit: "#{DEALER_DIRECTORY}/holdem.nolimit.2p.reverse_blinds.game"
+      nolimit: "#{DEALER_DIRECTORY}/holdem.nolimit.2p.reverse_blinds.game"
     },
-    three_player:
+    3 =>
     {
       limit: "#{DEALER_DIRECTORY}/holdem.limit.3p.game",
-      no_limit: "#{DEALER_DIRECTORY}/holdem.nolimit.3p.game"
+      nolimit: "#{DEALER_DIRECTORY}/holdem.nolimit.3p.game"
     }
   }
   DEALER_PATH = "#{DEALER_DIRECTORY}/dealer"
   EXAMPLE_PLAYERS =
   {
-    two_player:
+    2 =>
     {
       limit: "#{DEALER_DIRECTORY}/example_player.limit.2p.sh",
-      no_limit: "#{DEALER_DIRECTORY}/example_player.nolimit.2p.sh"
+      nolimit: "#{DEALER_DIRECTORY}/example_player.nolimit.2p.sh"
     },
-    three_player:
+    3 =>
     {
       limit: "#{DEALER_DIRECTORY}/example_player.limit.3p.sh",
-      no_limit: "#{DEALER_DIRECTORY}/example_player.nolimit.3p.sh"
+      nolimit: "#{DEALER_DIRECTORY}/example_player.nolimit.3p.sh"
     }
   }
 end

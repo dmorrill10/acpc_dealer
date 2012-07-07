@@ -11,9 +11,9 @@ Gem::Specification.new do |gem|
   gem.homepage      = "https://github.com/dmorrill10/acpc_dealer"
 
   gem.add_dependency 'rake-compiler'
+  gem.add_dependency 'clive'
+  gem.add_dependency 'dmorrill10-utils', '~>0.0.5'
 
-  gem.add_development_dependency 'rspec'
-  gem.add_development_dependency 'mocha'
   gem.add_development_dependency 'piston'
 
   gem.files         = Dir.glob("lib/**/*") + Dir.glob("ext/**/*") + Dir.glob('*.gemspec') +
@@ -21,5 +21,5 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.extensions    = Dir.glob("ext/**/extconf.rb")
   gem.require_paths = ["lib"]
-  gem.executables   << 'compile_acpc_dealer.rb'
+  gem.executables   << 'acpc_dealer.rb'
 end

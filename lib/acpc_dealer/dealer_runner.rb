@@ -10,6 +10,8 @@ class DealerRunner
   def self.start(match_name, dealer_arguments, log_directory)
     dealer_start_command = dealer_arguments.unshift(match_name).unshift(AcpcDealer::DEALER_PATH)
 
+    puts "dealer_start_command: #{dealer_start_command}"
+
     FileUtils.mkdir_p log_directory
 
     ProcessRunner.go(
