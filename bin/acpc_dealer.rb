@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-require 'dmorrill10-utils/script'
+require 'dmorrill10-utils/process_runner'
 
 require 'fileutils'
 
@@ -76,7 +76,7 @@ class AcpcDealerCli < Clive
     
     opt :t_per_hand, 'Maximum average player time for match', arg: '<t_per_hand_milliseconds>', as: Integer 
     
-    desc 'maximum time to wait for players to connect, defaults to no timeout'
+    desc 'Maximum time to wait for players to connect, defaults to no timeout'
     opt :start_timeout, arg: '<start_timeout_milliseconds>', as: Integer
 
     action do
@@ -109,7 +109,8 @@ class AcpcDealerCli < Clive
           player_names << "p#{player_names.length+1}"
       end
 
-      arguments = [game_def, get(:hands).to_s, random_seed.to_s] + player_names
+      # Append to produce behavior of previous dealer version
+      arguments = [game_def, get(:hands).to_s, random_seed.to_s] + player_names << '-a'
 
       arguments << '-f' if get(:f)
       arguments << "--t_response #{get(:t_response_milliseconds)}" if get(:t_response_milliseconds)
@@ -126,6 +127,35 @@ class AcpcDealerCli < Clive
       AcpcDealerCli.run(['compile']) unless File.exists? AcpcDealer::DEALER_PATH
 
       puts "Ports: #{DealerRunner.start(name, arguments, log_directory).gets}"
+    end
+  end
+
+  command :example_player, 'Starts an example player' do
+    desc 'Parameters that determine which type of player to use, same format as that for the dealer command'
+    opt :g, :game_def, args: '<number_of_players> <betting_type>', as: [Integer, Symbol]
+
+    desc 'The host name of the running dealer, defaults to "localhost"'
+    opt :o, :host_name, arg: '<host_name>', as: String
+
+    desc 'The port on which this player will try to connect to the dealer'
+    opt :p, :port, arg: '<port>', as: String
+
+    action do
+      AcpcDealerCli.print_usage(:example_player) unless get(:game_def)
+      AcpcDealerCli.print_usage(:example_player) unless get(:port)
+
+      (number_of_players, betting_type) = get(:game_def)
+      # Check that a game def for the specified parameters exists
+      AcpcDealerCli.game_def_from_components(number_of_players, betting_type)
+
+      host_name = if get(:host_name) then get(:host_name) else 'localhost' end
+
+      player = AcpcDealer::EXAMPLE_PLAYERS[number_of_players][betting_type]
+      players_directory = File.dirname(player)
+      FileUtils.cd players_directory
+      ProcessRunner.go [player, host_name, get(:port)]
+
+      puts "Example player for #{number_of_players} player #{betting_type}, connected to dealer on #{host_name}:#{get(:port)}"
     end
   end
 end
