@@ -1,6 +1,7 @@
 require "bundler/gem_tasks"
 require 'rake'
 require 'rake/extensiontask'
+require 'rake/testtask'
 
 require File.expand_path('../lib/acpc_dealer/version', __FILE__)
 
@@ -11,9 +12,9 @@ task :default => :build
 
 task :build => :compile
 
-task :tag => :build do
-  puts "Tagging #{AcpcDealer::VERSION}..."
-  system "git tag -a #{AcpcDealer::VERSION} -m 'Tagging #{AcpcDealer::VERSION}'"
-  puts "Pushing #{AcpcDealer::VERSION} to git..."
-  system "git push --tags"
+Rake::TestTask.new do |t|
+  t.libs << "lib" << 'spec/support'
+  t.test_files = FileList['spec/**/*_spec.rb']
+  t.verbose = true
+  t.warning = true
 end

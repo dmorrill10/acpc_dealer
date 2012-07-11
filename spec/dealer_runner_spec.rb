@@ -1,0 +1,81 @@
+# Spec helper (must include first to track code coverage with SimpleCov)
+require_relative 'support/spec_helper'
+
+require 'socket'
+require 'tmpdir'
+
+require_relative '../lib/acpc_dealer'
+require_relative '../lib/acpc_dealer/dealer_runner'
+
+describe DealerRunner do
+  before do
+    @pid = nil
+    @port_numbers = nil
+  end
+
+  describe '::ports_for_players' do
+    it 'returns two random open ports' do
+      various_numbers_of_players.each do |number_of_players|
+        DealerRunner.ports_for_players(number_of_players).each do |port|
+          begin 
+            TCPServer.open('localhost', port) { }
+          rescue Errno::EADDRINUSE => e
+            flunk "Port #{port} is not open: #{e.message}"
+          end
+        end
+      end
+    end
+  end
+
+  describe '::start' do
+    it 'starts a dealer asynchronously that can clean up after itself and returns both its PID and the ports that each player can use to connect' do
+      various_numbers_of_players.each do |number_of_players|
+        Dir.mktmpdir do |temp_log_directory|
+          pid_and_port_numbers = DealerRunner.start(
+            {
+              match_name: 'test_match',
+              game_def_file_name: AcpcDealer::GAME_DEFINITION_FILE_PATHS[number_of_players][:limit],
+              hands: 10,
+              random_seed: 0,
+              player_names: number_of_players.times.inject([]) do |names, i|
+                names << "p#{i}"
+              end.join(' '),
+              options: ['--t_response 100', '--start_timeout 100'].join(' ')
+            },
+            temp_log_directory
+          )
+
+          @pid = pid_and_port_numbers[:pid]
+          @port_numbers = pid_and_port_numbers[:port_numbers]
+
+          check_ports_are_in_use
+
+          check_process_exists
+
+          cleanup
+        end
+      end
+    end
+  end
+  
+  def cleanup
+    Process.kill 'KILL', @pid
+
+    ->() { Process.getpgid(@pid) }.must_raise Errno::ESRCH
+  end
+  def check_process_exists
+    begin
+      Process.getpgid(@pid)
+    rescue Errno::ESRCH => e
+      flunk "Dealer with pid #{@pid} does not exist: #{e.message}"
+    end
+  end
+  def check_ports_are_in_use
+    @port_numbers.each do |port|
+      ->() do 
+        TCPServer.open('localhost', port)
+      end.must_raise Errno::EADDRINUSE
+    end
+  end
+  def various_numbers_of_players() [2, 3] end
+end

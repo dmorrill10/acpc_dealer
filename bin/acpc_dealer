@@ -65,10 +65,8 @@ class AcpcDealerCli < Clive
     
     desc 'The names of the players participating in the match, defaults to "p1", "p2", ...'
     opt :p, :player_names, args: '<p1_name>...', as: [String]
-
-    bool :f, :fixed_button, 'Use fixed dealer button at table'
     
-    opt :l, :log_directory, 'Directory where logs will be placed'
+    opt :l, :log_directory, 'Directory where logs will be placed', arg: '<log_directory>', as: String
 
     opt :t_response, 'Maximum time per response', arg: '<t_response_milliseconds>', as: Integer
     
@@ -109,14 +107,22 @@ class AcpcDealerCli < Clive
           player_names << "p#{player_names.length+1}"
       end
 
-      # Append to produce behavior of previous dealer version
-      arguments = [game_def, get(:hands).to_s, random_seed.to_s] + player_names << '-a'
+      arguments = {
+        match_name: name, 
+        game_def_file_name: game_def, 
+        hands: get(:hands).to_s, 
+        random_seed: random_seed.to_s,
+        player_names: player_names.join(' ')
+      }
 
-      arguments << '-f' if get(:f)
-      arguments << "--t_response #{get(:t_response_milliseconds)}" if get(:t_response_milliseconds)
-      arguments << "--t_hand #{get(:t_hand_milliseconds)}" if get(:t_hand_milliseconds)
-      arguments << "--t_per_hand #{get(:t_per_hand_milliseconds)}" if get(:t_per_hand_milliseconds)
-      arguments << "--start_timeout #{get(:start_timeout_milliseconds)}" if get(:start_timeout_milliseconds)
+      # Append to produce behavior of previous dealer version
+      options = ['-a']
+      options << "--t_response #{get(:t_response_milliseconds)}" if get(:t_response_milliseconds)
+      options << "--t_hand #{get(:t_hand_milliseconds)}" if get(:t_hand_milliseconds)
+      options << "--t_per_hand #{get(:t_per_hand_milliseconds)}" if get(:t_per_hand_milliseconds)
+      options << "--start_timeout #{get(:start_timeout_milliseconds)}" if get(:start_timeout_milliseconds)
+
+      arguments[:options] = options
 
       log_directory = if get(:log_directory)
         get(:log_directory)
@@ -126,7 +132,8 @@ class AcpcDealerCli < Clive
 
       AcpcDealerCli.run(['compile']) unless File.exists? AcpcDealer::DEALER_PATH
 
-      puts "Ports: #{DealerRunner.start(name, arguments, log_directory).gets}"
+      dealer_pid_and_ports = DealerRunner.start(arguments, log_directory)
+      puts "Dealer pid: #{dealer_pid_and_ports[:pid]}, ports: #{dealer_pid_and_ports[:port_numbers].join(' ')}"      
     end
   end
 
@@ -160,10 +167,8 @@ class AcpcDealerCli < Clive
   end
 end
 
-if $0 == __FILE__
-  if ARGV.empty?
-    puts AcpcDealerCli.help
-  else  
-    AcpcDealerCli.run
-  end
+if ARGV.empty?
+  puts AcpcDealerCli.help
+else  
+  AcpcDealerCli.run
 end
