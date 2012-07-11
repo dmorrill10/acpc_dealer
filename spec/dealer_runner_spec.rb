@@ -31,7 +31,7 @@ describe DealerRunner do
     it 'starts a dealer asynchronously that can clean up after itself and returns both its PID and the ports that each player can use to connect' do
       various_numbers_of_players.each do |number_of_players|
         Dir.mktmpdir do |temp_log_directory|
-          pid_and_port_numbers = DealerRunner.start(
+          result = DealerRunner.start(
             {
               match_name: 'test_match',
               game_def_file_name: AcpcDealer::GAME_DEFINITION_FILE_PATHS[number_of_players][:limit],
@@ -45,8 +45,10 @@ describe DealerRunner do
             temp_log_directory
           )
 
-          @pid = pid_and_port_numbers[:pid]
-          @port_numbers = pid_and_port_numbers[:port_numbers]
+          @pid = result[:pid]
+          @port_numbers = result[:port_numbers]
+          
+          result[:log_directory].must_equal temp_log_directory
 
           check_ports_are_in_use
 

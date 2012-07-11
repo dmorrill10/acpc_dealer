@@ -24,7 +24,6 @@ class DealerRunner
     :options 
   ]
 
-  
   # @param [Array] dealer_arguments Arguments to the new dealer instance.
   # @param [String] log_directory The directory in which logs will be placed.
   # => Defaults to +<dealer_arguments[:match_name]>.logs+.
@@ -40,7 +39,9 @@ class DealerRunner
     end 
     dealer_start_command << "-p #{port_numbers.join(',')}" if port_numbers
 
-    log_directory = "#{dealer_arguments[:match_name]}.logs" unless log_directory
+    unless log_directory
+      log_directory = File.expand_path("../#{dealer_arguments[:match_name]}.logs", __FILE__)
+    end
 
     FileUtils.mkdir_p log_directory
 
@@ -55,7 +56,7 @@ class DealerRunner
         chdir: log_directory
       )
 
-      {pid: pid, port_numbers: read_io.gets.split}
+      {pid: pid, port_numbers: read_io.gets.split, log_directory: log_directory}
     end
   end
 
