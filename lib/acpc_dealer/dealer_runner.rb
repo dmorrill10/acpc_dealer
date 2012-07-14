@@ -2,7 +2,6 @@
 require 'socket'
 
 require 'dmorrill10-utils/process_runner'
-require File.expand_path('../../acpc_dealer', __FILE__)
 
 class DealerRunner
 

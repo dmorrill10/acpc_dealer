@@ -4,6 +4,7 @@ SimpleCov.start
 
 require 'minitest/spec'
 require 'minitest/autorun'
+require 'minitest/pride'
 
 begin 
   require 'turn/autorun'
@@ -20,5 +21,13 @@ begin
     # use humanized test names (works only with :outline format)
     c.natural = true
   end
+
+  require 'awesome_print'
+  module Minitest::Assertions
+    def mu_pp(obj)
+      obj.awesome_inspect
+    end
+  end
 rescue LoadError
 end
+
