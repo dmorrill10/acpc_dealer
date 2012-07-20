@@ -1,6 +1,6 @@
 # AcpcDealer
 
-Wraps the [<em>ACPC Dealer Server</em>][ACPC competition server] in a handy gem with a convenient runner class, and a script for compiling and running the dealer and example players.
+The [ACPC Dealer][ACPC Dealer GitHub] gem wraps the [<em>ACPC Dealer Server</em>][ACPC competition server] in a handy gem with a convenient runner class, and a script for compiling and running the dealer and example players.
 
 ## Installation
 
@@ -48,5 +48,6 @@ For every match, two files will be logged: `<match name>.log` containing the mat
     ================
 -->
 
+[ACPC Dealer GitHub]: https://github.com/dmorrill10/acpc_dealer#readme
 [ACPC competition server]: http://www.computerpokercompetition.org/index.php?option=com_rokdownloads&view=folder&Itemid=59
 [docs]: http://rubydoc.info/github/dmorrill10/acpc_dealer/frames
