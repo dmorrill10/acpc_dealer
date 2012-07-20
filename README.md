@@ -1,6 +1,7 @@
-# AcpcDealer
+ACPC Dealer
+============
 
-The [ACPC Dealer][ACPC Dealer GitHub] gem wraps the [<em>ACPC Dealer Server</em>][ACPC competition server] in a handy gem with a convenient runner class, and a script for compiling and running the dealer and example players.
+The [Annual Computer Poker Competition Dealer][ACPC Dealer GitHub] gem wraps the [<em>ACPC Dealer Server</em>][ACPC competition server] in a handy gem with a convenient runner class, and a script for compiling and running the dealer and example players.
 
 ## Installation
 
@@ -36,11 +37,17 @@ For every match, two files will be logged: `<match name>.log` containing the mat
 
 ## Contributing
 
+See the [issue tracker](https://github.com/dmorrill10/acpc_dealer/issues) for currently known issues, or to log new ones.
+
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Added some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+Copyright
+---------
+Copyright &copy; 2012 by the Computer Poker Research Group, University of Alberta. See [LICENSE](LICENSE.md) for details.
 
 
 <!---
