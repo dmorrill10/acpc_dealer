@@ -18,6 +18,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'simplecov'
   gem.add_development_dependency 'turn'
   gem.add_development_dependency 'minitest'
+  gem.add_development_dependency 'pry-rescue'
 
   gem.files         = Dir.glob("lib/**/*") + Dir.glob("ext/**/*") + Dir.glob('*.gemspec') +
     %w(Rakefile README.md) + Dir.glob('spec/**/*') + Dir.glob("vendor/**/*")

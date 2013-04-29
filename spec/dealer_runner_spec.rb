@@ -17,7 +17,7 @@ describe DealerRunner do
     it 'returns two random open ports' do
       various_numbers_of_players.each do |number_of_players|
         DealerRunner.ports_for_players(number_of_players).each do |port|
-          begin 
+          begin
             TCPServer.open('localhost', port) { }
           rescue Errno::EADDRINUSE => e
             flunk "Port #{port} is not open: #{e.message}"
@@ -40,14 +40,14 @@ describe DealerRunner do
               player_names: number_of_players.times.inject([]) do |names, i|
                 names << "p#{i}"
               end.join(' '),
-              options: ['--t_response 100', '--start_timeout 100'].join(' ')
+              options: ['--start_timeout 1000'].join(' ')
             },
             temp_log_directory
           )
 
           @pid = result[:pid]
           @port_numbers = result[:port_numbers]
-          
+
           result[:log_directory].must_equal temp_log_directory
 
           check_ports_are_in_use
@@ -59,9 +59,10 @@ describe DealerRunner do
       end
     end
   end
-  
+
   def cleanup
     Process.kill 'KILL', @pid
+    sleep 1
 
     ->() { Process.getpgid(@pid) }.must_raise Errno::ESRCH
   end
@@ -74,7 +75,7 @@ describe DealerRunner do
   end
   def check_ports_are_in_use
     @port_numbers.each do |port|
-      ->() do 
+      ->() do
         TCPServer.open('localhost', port)
       end.must_raise Errno::EADDRINUSE
     end
