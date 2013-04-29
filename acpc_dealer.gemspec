@@ -14,8 +14,6 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'dmorrill10-utils', '>= 1.0.0'
   gem.add_dependency 'rake-compiler'
 
-  gem.add_development_dependency 'piston'
-
   gem.add_development_dependency 'mocha'
   gem.add_development_dependency 'simplecov'
   gem.add_development_dependency 'turn'

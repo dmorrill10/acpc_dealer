@@ -14,6 +14,7 @@ Copyright (C) 2011 by the Computer Poker Research Group, University of Alberta
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <sys/wait.h>
+#include <errno.h>
 #include "net.h"
 
 
@@ -68,6 +69,38 @@ int main( int argc, char **argv )
   sock = connectTo( argv[ ARG_SERVERNAME ], port );
   if( sock < 0 ) {
 
+    exit( EXIT_FAILURE );
+  }
+
+  // EJ additions 9/3/2012
+  // Turn on keep-alive for socket connection with more frequent checking
+  // than the Linux default.  What I've observed is that if a socket
+  // connection is idle for long enough it gets dropped.  This only
+  // happens for some users.
+  int on = 1;
+  if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) == -1) {
+    fprintf( stderr, "ERROR: setsockopt failed; errno %i\n", errno );
+    exit( EXIT_FAILURE );
+  }
+  // Not sure what this should be
+  int num_before_failure = 2;
+  if (setsockopt(sock, SOL_TCP, TCP_KEEPCNT, &num_before_failure,
+		 sizeof(num_before_failure)) == -1) {
+    fprintf( stderr, "ERROR: setsockopt failed; errno %i\n", errno );
+    exit( EXIT_FAILURE );
+  }
+  // First check after 60 seconds
+  int initial_secs = 60;
+  if (setsockopt(sock, SOL_TCP, TCP_KEEPIDLE, &initial_secs,
+		 sizeof(initial_secs)) == -1) {
+    fprintf( stderr, "ERROR: setsockopt failed; errno %i\n", errno );
+    exit( EXIT_FAILURE );
+  }
+  // Thereafter, also check every 60 seconds
+  int interval_secs = 60;
+  if (setsockopt(sock, SOL_TCP, TCP_KEEPINTVL, &interval_secs,
+		 sizeof(interval_secs)) == -1) {
+    fprintf( stderr, "ERROR: setsockopt failed; errno %i\n", errno );
     exit( EXIT_FAILURE );
   }
 
@@ -148,6 +181,7 @@ int main( int argc, char **argv )
 	  }
 
 	  printf( "starting match %s:%s", &line[ 4 ], &line[ i + 1 ] );
+	  fflush( stdout );
 
 	  /* run `command machine port` */
 	  childPID = fork();
@@ -177,6 +211,7 @@ int main( int argc, char **argv )
 	    fprintf( stderr, "ERROR: failed while printing server message\n" );
 	    exit( EXIT_FAILURE );
 	  }
+	  fflush( stdout );
 	}
       }
     }

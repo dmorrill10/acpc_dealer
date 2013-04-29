@@ -1,8 +1,0 @@
----
-repository_url: http://www.computerpokercompetition.org/repos/project_acpc_server/trunk/
-lock: false
-repository_class: Piston::Svn::Repository
-format: 1
-handler:
-  piston:uuid: b88a218e-aa01-4349-a77c-cb6aadfe8b2d
-  piston:remote-revision: 27

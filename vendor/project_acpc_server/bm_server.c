@@ -101,6 +101,9 @@ typedef struct {
   UserSpec *user;
   int numRuns;
   rng_state_t rng;
+  uint32_t rngSeed;
+  int useRngForSeed; /* 0: use rngSeed as seed for each dealer run
+			1: use genrand_int32( match->rng ) */
   char *tag;
   struct timeval queueTime;
   struct {
@@ -769,9 +772,17 @@ int parseMatchSpec( const Config *conf,
   }
 
   match->tag = strdup( tag );
+  match->rngSeed = rngSeed;
   if( rngSeed ) {
 
     init_genrand( &match->rng, rngSeed );
+    if( match->numRuns == 1 ) {
+
+      match->useRngForSeed = 0;
+    } else {
+
+      match->useRngForSeed = 1;
+    }
   } else {
 
     init_genrand( &match->rng, genrand_int32( &serv->rng ) );
@@ -802,7 +813,7 @@ void writeGameList( const Config *conf, int fd )
        cur != NULL; cur = LLPoolNextEntry( cur ) ) {
     GameConfig *game = (GameConfig *)LLPoolGetItem( cur );
 
-    r = sprintf( line, "\n%s\n", game->gameFile );
+    r = snprintf( line, sizeof( line ), "\n%s\n", game->gameFile );
     assert( r > 0 );
     r = write( fd, line, r );
 
@@ -810,7 +821,7 @@ void writeGameList( const Config *conf, int fd )
 	 botCur != NULL; botCur = LLPoolNextEntry( botCur ) ) {
       BotSpec *bot = (BotSpec *)LLPoolGetItem( botCur );
 
-      r = sprintf( line, " %s\n", bot->name );
+      r = snprintf( line, sizeof( line ), " %s\n", bot->name );
       assert( r > 0 );
       r = write( fd, line, r );
     }
@@ -831,13 +842,14 @@ void writeQueueStatus( const Config *conf, const ServerState *serv, int fd )
        cur != NULL; cur = LLPoolNextEntry( cur ) ) {
     Match *match = (Match *)LLPoolGetItem( cur );
 
-    r = sprintf( line,
-		 "%s %s %s * %d %s\n",
-		 match->user->name,
-		 match->tag,
-		 match->gameConf->gameFile,
-		 match->numRuns,
-		 match->isRunning ? "R" : "Q" );
+    r = snprintf( line,
+		  sizeof( line ),
+		  "%s %s %s * %d %s\n",
+		  match->user->name,
+		  match->tag,
+		  match->gameConf->gameFile,
+		  match->numRuns,
+		  match->isRunning ? "R" : "Q" );
     assert( r > 0 );
     r = write( fd, line, r );
   }
@@ -913,7 +925,7 @@ void handleConnection( Config *conf, ServerState *serv,
 
 int timeIsEarlier( struct timeval *a, struct timeval *b )
 {
-  if( a->tv_sec < b->tv_usec ) {
+  if( a->tv_sec < b->tv_sec ) {
     return 1;
   } else if( a->tv_sec == b->tv_sec
 	     && a->tv_usec < b->tv_usec ) {
@@ -939,7 +951,10 @@ int botsInMatch( const Match *match )
   return num;
 }
 
-void startDealer( const Config *conf, const Match *match, MatchJob *job )
+void startDealer( const Config *conf,
+		  const Match *match,
+		  MatchJob *job,
+		  const uint32_t rngSeed )
 {
   int stdoutPipe[ 2 ], p, arg;
   char handsString[ 16 ], rngString[ 16 ];
@@ -964,7 +979,7 @@ void startDealer( const Config *conf, const Match *match, MatchJob *job )
     int stderrfd;
     char tag[ READBUF_LEN ];
 
-    sprintf( tag, "%s/%s.stderr", BM_LOGDIR, job->tag );
+    snprintf( tag, sizeof( tag ), "%s/%s.stderr", BM_LOGDIR, job->tag );
     stderrfd = open( tag, O_WRONLY | O_APPEND | O_CREAT, 0644 );
     if( stderrfd < 0 ) {
 
@@ -984,20 +999,21 @@ void startDealer( const Config *conf, const Match *match, MatchJob *job )
     argv[ arg ] = BM_DEALER;
     ++arg;
 
-    sprintf( tag, "%s/%s", BM_LOGDIR, job->tag );
+    snprintf( tag, sizeof( tag ), "%s/%s", BM_LOGDIR, job->tag );
     argv[ arg ] = tag;
     ++arg;
 
     argv[ arg ] = match->gameConf->gameFile;
     ++arg;
 
-    sprintf( handsString, "%"PRIu32, match->gameConf->matchHands );
+    snprintf( handsString, 
+	      sizeof( handsString ), 
+	      "%"PRIu32, 
+	      match->gameConf->matchHands );
     argv[ arg ] = handsString;
     ++arg;
 
-    sprintf( rngString, "%"PRIu32,
-	     genrand_int32( &( (Match *)LLPoolGetItem( job->matchEntry ) )
-			    ->rng ) );
+    snprintf( rngString, sizeof( rngString ), "%"PRIu32, rngSeed );
     argv[ arg ] = rngString;
     ++arg;
 
@@ -1021,8 +1037,10 @@ void startDealer( const Config *conf, const Match *match, MatchJob *job )
       argv[ arg ] = "--start_timeout";
       ++arg;
 
-      sprintf( startupTimeoutString,
-               "%d", (int)conf->startupTimeoutSecs * 1000 );
+      snprintf( startupTimeoutString,
+                sizeof( startupTimeoutString ),
+                "%d",
+                (int)conf->startupTimeoutSecs * 1000 );
       argv[ arg ] = startupTimeoutString;
       ++arg;
     }
@@ -1031,8 +1049,10 @@ void startDealer( const Config *conf, const Match *match, MatchJob *job )
     argv[ arg ] = "--t_response";
     ++arg;
 
-    sprintf( responseTimeoutString, 
-             "%d", (int)conf->responseTimeoutSecs * 1000 );
+    snprintf( responseTimeoutString, 
+             sizeof( responseTimeoutString ),
+             "%d",
+             (int)conf->responseTimeoutSecs * 1000 );
     argv[ arg ] = responseTimeoutString;
     ++arg;
 
@@ -1040,7 +1060,10 @@ void startDealer( const Config *conf, const Match *match, MatchJob *job )
     argv[ arg ] = "--t_hand";
     ++arg;
 
-    sprintf( handTimeoutString, "%d", (int)conf->handTimeoutSecs * 1000 );
+    snprintf( handTimeoutString, 
+             sizeof( handTimeoutString ),
+             "%d",
+             (int)conf->handTimeoutSecs * 1000 );
     argv[ arg ] = handTimeoutString;
     ++arg;
 
@@ -1048,12 +1071,20 @@ void startDealer( const Config *conf, const Match *match, MatchJob *job )
     argv[ arg ] = "--t_per_hand";
     ++arg;
 
-    sprintf( avgHandTimeString, "%d", (int)conf->avgHandTimeSecs * 1000 );
+    snprintf( avgHandTimeString, 
+             sizeof( avgHandTimeString ),
+             "%d",
+             (int)conf->avgHandTimeSecs * 1000 );
     argv[ arg ] = avgHandTimeString;
     ++arg;
 
 
     argv[ arg ] = "-q";
+    ++arg;
+
+    /* Restore the appending behaviour so multiple matches get appended into
+     * the same log file */
+    argv[ arg ] = "-a";
     ++arg;
 
     argv[ arg ] = NULL;
@@ -1126,8 +1157,8 @@ pid_t startBot( const ServerState *serv,
     char portString[ 8 ];
     char posString[ 16 ];
 
-    sprintf( portString, "%"PRIu16, port );
-    sprintf( posString, "%d", botPosition );
+    snprintf( portString, sizeof( portString ), "%"PRIu16, port );
+    snprintf( posString, sizeof( posString ), "%d", botPosition );
 
     /* throw away bot output */
     dup2( serv->devnullfd, 1 );
@@ -1148,15 +1179,26 @@ pid_t startBot( const ServerState *serv,
 }
 
 int sendStartMessage( const ServerState *serv,
+		      const MatchJob *job,
 		      const Connection *conn,
 		      const uint16_t port )
 {
   int len;
-  char msg[ strlen( serv->hostname ) + 8 ];
+  char msg[ strlen( serv->hostname ) + 12 + READBUF_LEN ];
 
-  len = sprintf( msg, "RUN %s %"PRIu16"\n", serv->hostname, port );
+  len = snprintf( msg, sizeof( msg ), "# RUNNING %s\n", job->tag );
   assert( len > 0 );
+  if( write( conn->connBuf->fd, msg, len ) < len ) {
 
+    fprintf( stderr, "BM_ERROR: short write to connection\n" );
+    return -1;
+  }
+
+  len = snprintf( msg,
+                  sizeof( msg ), 
+                  "RUN %s %"PRIu16"\n", 
+                  serv->hostname, port );
+  assert( len > 0 );
   if( write( conn->connBuf->fd, msg, len ) < len ) {
 
     fprintf( stderr, "BM_ERROR: short write to connection\n" );
@@ -1179,7 +1221,7 @@ MatchJob runMatchJob( const Config *conf,
   job.matchEntry = matchEntry;
 
   /* make the tag from the match tag */
-  sprintf( tag, "%s.%s", match->user->name, match->tag );
+  snprintf( tag, sizeof( tag ), "%s.%s", match->user->name, match->tag );
   job.tag = strdup( tag );
 
   /* initialise all PIDs to 0 */
@@ -1190,7 +1232,7 @@ MatchJob runMatchJob( const Config *conf,
   }
 
   /* start the dealer */
-  startDealer( conf, match, &job );
+  startDealer( conf, match, &job, rngSeed );
 
   /* deal with all the players */
   botPosition = 0;
@@ -1200,7 +1242,7 @@ MatchJob runMatchJob( const Config *conf,
       /* send message with port to network player to start up */
       Connection *conn = (Connection*)LLPoolGetItem( match->players[ p ].entry );
 
-      if( sendStartMessage( serv, conn, job.ports[ p ] ) < 0 ) {
+      if( sendStartMessage( serv, &job, conn, job.ports[ p ] ) < 0 ) {
 	/* abort the job... */
 
 	fprintf( stderr, "BM_ERROR: aborting job\n" );
@@ -1309,7 +1351,12 @@ int startMatchJob( const Config *conf, ServerState *serv )
   }
 
   /* create the job */
-  job = runMatchJob( conf, serv, best, genrand_int32( &bestMatch->rng ) );
+  job = runMatchJob( conf,
+		     serv,
+		     best,
+		     bestMatch->useRngForSeed
+		     ? genrand_int32( &bestMatch->rng )
+		     : bestMatch->rngSeed );
   assert( job.dealerPID );
   LLPoolAddItem( serv->jobs, &job );
 

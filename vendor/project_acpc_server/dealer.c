@@ -861,6 +861,16 @@ static int gameLoop( const Game *game, char *seatName[ MAX_PLAYERS ],
       }
     }
 
+    if ( !quiet ) {
+      if ( handId % 100 == 0) {
+	for( seat = 0; seat < game->numPlayers; ++seat ) {
+	  fprintf(stderr, "Seconds cumulatively spent in match for seat %i: "
+		  "%i\n", seat,
+		  (int)(errorInfo->usedMatchMicros[ seat ] / 1000000));
+	}
+      }
+    }
+
     /* start a new hand */
     if( setUpNewHand( game, fixedSeats, &handId, &player0Seat,
 		      rng, errorInfo, &state.state ) < 0 ) {
@@ -1234,7 +1244,7 @@ int main( int argc, char **argv )
       if( select( listenSocket[ i ] + 1, &fds, NULL, NULL, &tv ) < 1 ) {
 	/* no input ready within time, or an actual error */
 
-	fprintf( stderr, "ERROR: timed out wating for seat %d to connect\n",
+	fprintf( stderr, "ERROR: timed out waiting for seat %d to connect\n",
 		 i + 1 );
 	exit( EXIT_FAILURE );
       }
@@ -1265,7 +1275,8 @@ int main( int argc, char **argv )
     exit( EXIT_FAILURE );
   }
 
-  fflush( NULL );
+  fflush( stderr );
+  fflush( stdout );
   if( transactionFile != NULL ) {
     fclose( transactionFile );
   }

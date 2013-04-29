@@ -17,15 +17,15 @@
 
 
 /* Period parameters */  
-#define N 624
-#define M 397
+#define RNG_N 624
+#define RNG_M 397
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
 #define UPPER_MASK 0x80000000UL /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffffUL /* least significant r bits */
 
 
 typedef struct {
-uint32_t mt[ N ];
+uint32_t mt[ RNG_N ];
 int mti;
 } rng_state_t;
 

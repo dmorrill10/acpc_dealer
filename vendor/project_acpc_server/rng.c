@@ -53,11 +53,11 @@
    with this code, DON'T complain to Makoto Matsumoto... */
 
 
-/* initializes mt[N] with a seed */
+/* initializes mt[RNG_N] with a seed */
 void init_genrand( rng_state_t *state, uint32_t s )
 {
   state->mt[0]= s & 0xffffffffUL;
-  for (state->mti=1; state->mti<N; state->mti++) {
+  for (state->mti=1; state->mti<RNG_N; state->mti++) {
     state->mt[state->mti] = 
       (1812433253UL * (state->mt[state->mti-1]
 		       ^ (state->mt[state->mti-1] >> 30))
@@ -79,24 +79,24 @@ void init_by_array( rng_state_t *state, uint32_t init_key[], int key_length )
 
   init_genrand(state, 19650218UL);
   i=1; j=0;
-  k = (N>key_length ? N : key_length);
+  k = (RNG_N>key_length ? RNG_N : key_length);
   for (; k; k--) {
     state->mt[i] = ( state->mt[i]
 		     ^ ( ( state->mt[i-1] ^ ( state->mt[i-1] >> 30 ) )
 			 * 1664525UL ) )
       + init_key[j] + j; /* non linear */
     i++; j++;
-    if (i>=N) { state->mt[0] = state->mt[N-1]; i=1; }
+    if (i>=RNG_N) { state->mt[0] = state->mt[RNG_N-1]; i=1; }
     if (j>=key_length) j=0;
   }
-  for (k=N-1; k; k--) {
+  for (k=RNG_N-1; k; k--) {
     state->mt[i] = ( state->mt[i]
 		     ^ ( ( state->mt[i-1] ^ ( state->mt[i-1] >> 30 ) )
 			 * 1566083941UL ) )
       - i; /* non linear */
     state->mt[i] &= 0xffffffffUL; /* for WORDSIZE > 32 machines */
     i++;
-    if (i>=N) { state->mt[0] = state->mt[N-1]; i=1; }
+    if (i>=RNG_N) { state->mt[0] = state->mt[RNG_N-1]; i=1; }
   }
 
   state->mt[0]|= 0x80000000UL; /* MSB is 1; assuring non-zero initial array */ 
@@ -109,19 +109,20 @@ uint32_t genrand_int32( rng_state_t *state )
     static uint32_t mag01[2]={0x0UL, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
-    if (state->mti == N) { /* generate N words at one time */
+    if (state->mti == RNG_N) { /* generate RNG_N words at one time */
         int kk;
 
-        for (kk=0;kk<N-M;kk++) {
+        for (kk=0;kk<RNG_N-RNG_M;kk++) {
             y = (state->mt[kk]&UPPER_MASK)|(state->mt[kk+1]&LOWER_MASK);
-            state->mt[kk] = state->mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1UL];
+            state->mt[kk] = state->mt[kk+RNG_M] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
-        for (;kk<N-1;kk++) {
+        for (;kk<RNG_N-1;kk++) {
             y = (state->mt[kk]&UPPER_MASK)|(state->mt[kk+1]&LOWER_MASK);
-            state->mt[kk] = state->mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
+            state->mt[kk] =
+	      state->mt[kk+(RNG_M-RNG_N)] ^ (y >> 1) ^ mag01[y & 0x1UL];
         }
-        y = (state->mt[N-1]&UPPER_MASK)|(state->mt[0]&LOWER_MASK);
-        state->mt[N-1] = state->mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
+        y = (state->mt[RNG_N-1]&UPPER_MASK)|(state->mt[0]&LOWER_MASK);
+        state->mt[RNG_N-1] = state->mt[RNG_M-1] ^ (y >> 1) ^ mag01[y & 0x1UL];
 
         state->mti = 0;
     }
