@@ -10,17 +10,17 @@ class DealerRunner
   # => (see ::start)
   DEALER_COMMAND_FORMAT = [
     # @note The name of the match to start.
-    :match_name, 
+    :match_name,
     # @note The path of the game definition to use.
-    :game_def_file_name, 
+    :game_def_file_name,
     # @note The number of hands to play.
     :hands,
     # @note The random seed to use.
-    :random_seed, 
+    :random_seed,
     # @note The names of the players in the game. Should be specified as a space delimited string of names.
     :player_names,
     # @note Should be specified as an option string that the dealer will understand.
-    :options 
+    :options
   ]
 
   # @param [Array] dealer_arguments Arguments to the new dealer instance.
@@ -28,27 +28,27 @@ class DealerRunner
   # => Defaults to +<dealer_arguments[:match_name]>.logs+.
   # @param [Array] port_numbers The port numbers to which each player will connect.
   # => Defaults to random.
-  # @return [Hash] The process ID of the started dealer (key +:pid+) and the array of ports that players may 
+  # @return [Hash] The process ID of the started dealer (key +:pid+) and the array of ports that players may
   # => use to connect to the new dealer instance (key +:port_numbers+).
   # @raise (see ProcessRunner::go)
   # @raise (see FileUtils::mkdir_p)
   def self.start(dealer_arguments, log_directory=nil, port_numbers=nil)
     dealer_start_command = DEALER_COMMAND_FORMAT.inject([AcpcDealer::DEALER_PATH]) do |command, parameter|
       command << dealer_arguments[parameter].to_s
-    end 
+    end
     dealer_start_command << "-p #{port_numbers.join(',')}" if port_numbers
 
     unless log_directory
       log_directory = File.expand_path("../#{dealer_arguments[:match_name]}.logs", __FILE__)
     end
 
-    FileUtils.mkdir_p log_directory
+    FileUtils.mkdir_p log_directory unless Dir.exist?(log_directory)
 
     IO.pipe do |read_io, write_io|
       pid = ProcessRunner.go(
-        dealer_start_command, 
+        dealer_start_command,
         err: [
-          "#{dealer_arguments[:match_name]}.actions.log", 
+          File.join(log_directory, "#{dealer_arguments[:match_name]}.actions.log"),
           File::CREAT|File::WRONLY
         ],
         out: write_io,
