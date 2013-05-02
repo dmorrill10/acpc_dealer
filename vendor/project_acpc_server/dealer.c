@@ -127,7 +127,7 @@ static void initErrorInfo( const uint32_t maxInvalidActions,
     info->usedMatchMicros[ s ] = 0;
   }
 }
-		    
+
 
 /* update the number of invalid actions for seat
    returns >= 0 if match should continue, -1 for failure */
@@ -704,8 +704,8 @@ static int printFinalMessage( const Game *game, char *seatName[ MAX_PLAYERS ],
 
    actions are read/sent to seat p on seatFD[ p ]
 
-   if quiet is not zero, only print out errors, warnings, and final value   
-   
+   if quiet is not zero, only print out errors, warnings, and final value
+
    if logFile is not NULL, print out a single line for each completed
    match with the final state and all player values.  The values are
    printed in player, not seat order.
@@ -1186,7 +1186,7 @@ int main( int argc, char **argv )
       fprintf( stderr, "ERROR: could not open transaction file %s\n", name );
       exit( EXIT_FAILURE );
     }
-  } else { 
+  } else {
     /* no transaction file */
 
     transactionFile = NULL;
@@ -1275,8 +1275,12 @@ int main( int argc, char **argv )
     exit( EXIT_FAILURE );
   }
 
-  fflush( stderr );
-  fflush( stdout );
+  //fflush( stderr );
+  //fflush( stdout );
+  // Otherwise the last line or two of the log file
+  // won't be written sometimes when run through a
+  // Ruby interface.
+  fflush(NULL);
   if( transactionFile != NULL ) {
     fclose( transactionFile );
   }
