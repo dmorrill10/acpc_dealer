@@ -1,11 +1,10 @@
-# Spec helper (must include first to track code coverage with SimpleCov)
 require_relative 'support/spec_helper'
 
 require 'socket'
 require 'tmpdir'
 
-require_relative '../lib/acpc_dealer'
-require_relative '../lib/acpc_dealer/dealer_runner'
+require 'acpc_dealer/dealer_runner'
+include AcpcDealer
 
 describe DealerRunner do
   before do
@@ -34,7 +33,7 @@ describe DealerRunner do
           result = DealerRunner.start(
             {
               match_name: 'test_match',
-              game_def_file_name: AcpcDealer::GAME_DEFINITION_FILE_PATHS[number_of_players][:limit],
+              game_def_file_name: GAME_DEFINITION_FILE_PATHS[number_of_players][:limit],
               hands: 10,
               random_seed: 0,
               player_names: number_of_players.times.inject([]) do |names, i|

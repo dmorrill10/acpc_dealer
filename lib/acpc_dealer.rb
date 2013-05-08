@@ -31,4 +31,10 @@ module AcpcDealer
       nolimit: "#{DEALER_DIRECTORY}/example_player.nolimit.3p.sh"
     }
   }
+
+  ConnectionInformation = Struct.new(:port_number, :host_name, :millisecond_response_timeout) do
+    def initialize(port_number, host_name = 'localhost', millisecond_response_timeout = nil)
+      super port_number, host_name, millisecond_response_timeout
+    end
+  end
 end

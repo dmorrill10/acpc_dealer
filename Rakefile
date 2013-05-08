@@ -15,6 +15,6 @@ task :build => :compile
 Rake::TestTask.new do |t|
   t.libs << "lib" << 'spec/support'
   t.test_files = FileList['spec/**/*_spec.rb']
-  t.verbose = true
-  t.warning = true
+  t.verbose = false
+  t.warning = false
 end
