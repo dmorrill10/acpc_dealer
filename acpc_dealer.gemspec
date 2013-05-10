@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.homepage      = "https://github.com/dmorrill10/acpc_dealer"
 
   gem.add_dependency 'clive', '~> 1.2'
-  gem.add_dependency 'dmorrill10-utils', '~> 1.0'
+  gem.add_dependency 'process_runner', '~> 0.0'
   gem.add_dependency 'rake-compiler', '~> 0.8'
 
   gem.add_development_dependency 'mocha', '~> 0.13'

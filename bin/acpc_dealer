@@ -1,12 +1,10 @@
 #!/usr/bin/env ruby
 
-require 'dmorrill10-utils/process_runner'
-
+require 'process_runner'
 require 'fileutils'
-
 require 'clive'
 
-require File.expand_path('../../lib/acpc_dealer', __FILE__)
+require_relative '../lib/acpc_dealer'
 
 class AcpcDealerCli < Clive
 
@@ -54,26 +52,26 @@ class AcpcDealerCli < Clive
   command :dealer, 'Runs the ACPC Dealer' do
     desc 'The name of the match, defaults to <number_of_players>p.<betting_type>.h<hands>.r<random_seed>'
     opt :m, :name, arg: '<name>', as: String
-    
+
     desc 'Parameters that determine which game definition to use'
     opt :g, :game_def, args: '<number_of_players> <betting_type>', as: [Integer, Symbol]
-    
+
     opt :n, :hands, 'The number of hands to play', arg: '<hands>', as: Integer
-    
+
     desc 'The random seed to determine how the cards are dealt, defaults to a random random seed'
     opt :r, :random_seed, arg: '<random_seed>', as: Integer
-    
+
     desc 'The names of the players participating in the match, defaults to "p1", "p2", ...'
     opt :p, :player_names, args: '<p1_name>...', as: [String]
-    
+
     opt :l, :log_directory, 'Directory where logs will be placed', arg: '<log_directory>', as: String
 
     opt :t_response, 'Maximum time per response', arg: '<t_response_milliseconds>', as: Integer
-    
+
     opt :t_hand, 'Maximum player time per hand', arg: '<t_hand_milliseconds>', as: Integer
-    
-    opt :t_per_hand, 'Maximum average player time for match', arg: '<t_per_hand_milliseconds>', as: Integer 
-    
+
+    opt :t_per_hand, 'Maximum average player time for match', arg: '<t_per_hand_milliseconds>', as: Integer
+
     desc 'Maximum time to wait for players to connect, defaults to no timeout'
     opt :start_timeout, arg: '<start_timeout_milliseconds>', as: Integer
 
@@ -92,25 +90,25 @@ class AcpcDealerCli < Clive
       end
 
       name = if get(:name)
-        get(:name) 
-      else 
+        get(:name)
+      else
         "#{number_of_players}p.#{betting_type}.h#{get(:hands)}.r#{random_seed}"
       end
 
-      player_names = if get(:player_names) 
+      player_names = if get(:player_names)
         get(:player_names)
       else
         []
       end
-      
+
       while player_names.length < get(:game_def).first
           player_names << "p#{player_names.length+1}"
       end
 
       arguments = {
-        match_name: name, 
-        game_def_file_name: game_def, 
-        hands: get(:hands).to_s, 
+        match_name: name,
+        game_def_file_name: game_def,
+        hands: get(:hands).to_s,
         random_seed: random_seed.to_s,
         player_names: player_names.join(' ')
       }
@@ -163,6 +161,6 @@ end
 
 if ARGV.empty?
   puts AcpcDealerCli.help
-else  
+else
   AcpcDealerCli.run
 end

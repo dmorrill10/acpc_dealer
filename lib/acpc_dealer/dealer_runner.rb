@@ -1,7 +1,7 @@
 
 require 'socket'
 
-require 'dmorrill10-utils/process_runner'
+require 'process_runner'
 
 module AcpcDealer
   class DealerRunner
