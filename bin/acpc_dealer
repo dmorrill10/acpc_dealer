@@ -124,7 +124,7 @@ class AcpcDealerCli < Clive
 
       AcpcDealerCli.run(['compile']) unless File.exists? AcpcDealer::DEALER_PATH
 
-      dealer_result = DealerRunner.start(arguments, get(:log_directory))
+      dealer_result = AcpcDealer::DealerRunner.start(arguments, get(:log_directory))
       puts "Dealer pid: #{dealer_result[:pid]}, ports: #{dealer_result[:port_numbers].join(' ')}, log directory: #{dealer_result[:log_directory]}"
     end
   end
