@@ -66,14 +66,14 @@ class AcpcDealerCli < Clive
 
     opt :l, :log_directory, 'Directory where logs will be placed', arg: '<log_directory>', as: String
 
-    opt :t_response, 'Maximum time per response', arg: '<t_response_milliseconds>', as: Integer
+    opt :t_response, 'Maximum time per response', arg: '<t_response>', as: Integer
 
-    opt :t_hand, 'Maximum player time per hand', arg: '<t_hand_milliseconds>', as: Integer
+    opt :t_hand, 'Maximum player time per hand', arg: '<t_hand>', as: Integer
 
-    opt :t_per_hand, 'Maximum average player time for match', arg: '<t_per_hand_milliseconds>', as: Integer
+    opt :t_per_hand, 'Maximum average player time for match', arg: '<t_per_hand>', as: Integer
 
     desc 'Maximum time to wait for players to connect, defaults to no timeout'
-    opt :start_timeout, arg: '<start_timeout_milliseconds>', as: Integer
+    opt :start_timeout, arg: '<start_timeout>', as: Integer
 
     action do
       AcpcDealerCli.print_usage(:dealer) unless get(:game_def)
@@ -114,15 +114,17 @@ class AcpcDealerCli < Clive
       }
 
       # Append to produce behavior of previous dealer version
-      options = ['-a']
-      options << "--t_response #{get(:t_response_milliseconds)}" if get(:t_response_milliseconds)
-      options << "--t_hand #{get(:t_hand_milliseconds)}" if get(:t_hand_milliseconds)
-      options << "--t_per_hand #{get(:t_per_hand_milliseconds)}" if get(:t_per_hand_milliseconds)
-      options << "--start_timeout #{get(:start_timeout_milliseconds)}" if get(:start_timeout_milliseconds)
+      options = '-a'
+      options << " --t_response #{get(:t_response)}" if get(:t_response)
+      options << " --t_hand #{get(:t_hand)}" if get(:t_hand)
+      options << " --t_per_hand #{get(:t_per_hand)}" if get(:t_per_hand)
+      options << " --start_timeout #{get(:start_timeout)}" if get(:start_timeout)
 
       arguments[:options] = options
 
       AcpcDealerCli.run(['compile']) unless File.exists? AcpcDealer::DEALER_PATH
+
+      puts "Starting dealer with the following arguments: #{arguments}"
 
       dealer_result = AcpcDealer::DealerRunner.start(arguments, get(:log_directory))
       puts "Dealer pid: #{dealer_result[:pid]}, ports: #{dealer_result[:port_numbers].join(' ')}, log directory: #{dealer_result[:log_directory]}"
