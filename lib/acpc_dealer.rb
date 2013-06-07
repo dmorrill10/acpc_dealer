@@ -32,9 +32,9 @@ module AcpcDealer
     }
   }
 
-  ConnectionInformation = Struct.new(:port_number, :host_name, :millisecond_response_timeout) do
-    def initialize(port_number, host_name = 'localhost', millisecond_response_timeout = nil)
-      super port_number, host_name, millisecond_response_timeout
+  ConnectionInformation = Struct.new(:port_number, :host_name) do
+    def initialize(port_number, host_name = 'localhost')
+      super port_number, host_name
     end
   end
 end
