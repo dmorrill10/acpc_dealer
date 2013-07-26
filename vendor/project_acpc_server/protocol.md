@@ -3,7 +3,7 @@ ACPC Protocol Specification, version 2.0.0, October 2010
 
 This document describes the format of messages between the ACPC `dealer` program and a player. Communication is over *TCP*, where players connect to `dealer` with a port number that `dealer` will print to `STDOUT` upon starting. All messages are terminated by a 
 carriage return and a new line (`\r\n` or *ASCII* characters 13 and 10, respectively). 
-<!-- @todo Does the dealer still ever send comments or GUI commands? -->
+<!-- @todo Does the dealer still ever send comments or GUI commands?/do we still want users to be aware of this? Why would we waste the bandwidth to send players comments? -->
 Any message from the server which starts with '#' or ';' is a comment or GUI command, and may be safely ignored.
 The first message from a player must be a version string
     
