@@ -100,7 +100,7 @@ static enum ActionType charToAction[ 256 ] = {
 
 static char actionChars[ a_invalid +1 ] = "fcr";
 
-static char suitChars[ MAX_SUITS +1] = "shdc";
+static char suitChars[ MAX_SUITS +1] = "cdhs";
 static char rankChars[ MAX_RANKS +1] = "23456789TJQKA";
 
 
@@ -659,9 +659,9 @@ void dealCards( const Game *game, rng_state_t *rng, State *state )
   uint8_t deck[ MAX_RANKS * MAX_SUITS ];
 
   numCards = 0;
-  for( s = 0; s < game->numSuits; ++s ) {
+  for( s = MAX_SUITS - game->numSuits; s < MAX_SUITS; ++s ) {
 
-    for( r = MAX_RANKS - 1; r >= MAX_RANKS - game->numRanks; --r ) {
+    for( r = MAX_RANKS - game->numRanks; r < MAX_RANKS; ++r ) {
 
       deck[ numCards ] = makeCard( r, s );
       ++numCards;
