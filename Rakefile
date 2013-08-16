@@ -11,7 +11,9 @@ require File.expand_path('../lib/acpc_dealer/version', __FILE__)
 desc 'Build gem'
 task :default => [:build, :test]
 
-task :build => [:clean, :compile, 'dealer:compile']
+task :compile => ['dealer:clean', 'dealer:compile']
+
+task :build => [:clean, :compile]
 
 Rake::TestTask.new do |t|
   t.libs << "lib" << 'spec/support'
