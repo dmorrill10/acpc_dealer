@@ -5,8 +5,6 @@ require 'rake/testtask'
 
 require File.expand_path('../lib/acpc_dealer/version', __FILE__)
 
-Rake::ExtensionTask.new('hand_evaluator')
-
 desc 'Build gem'
 task :default => :build
 
@@ -18,3 +16,10 @@ Rake::TestTask.new do |t|
   t.verbose = false
   t.warning = false
 end
+
+def gemspec
+  @clean_gemspec ||= eval(File.read(File.expand_path('../acpc_dealer.gemspec', __FILE__)))
+end
+
+Gem::PackageTask.new(gemspec) { |pkg| }
+Rake::ExtensionTask.new('hand_evaluator', gemspec)

@@ -9,16 +9,17 @@ Gem::Specification.new do |gem|
   gem.description   = %q{Annual Computer Poker Competition Dealer}
   gem.summary       = %q{Ruby interface to the Annual Computer Poker Competition's dealer program.}
   gem.homepage      = "https://github.com/dmorrill10/acpc_dealer"
+  gem.license       = 'MIT'
+  gem.platform      = Gem::Platform::RUBY
 
   gem.add_dependency 'clive', '~> 1.2'
   gem.add_dependency 'process_runner', '~> 0.0'
   gem.add_dependency 'rake-compiler', '~> 0.8'
 
+  gem.add_development_dependency 'minitest', '~> 5.0.6'
   gem.add_development_dependency 'mocha', '~> 0.13'
+  gem.add_development_dependency 'awesome_print', '~> 1.0'
   gem.add_development_dependency 'simplecov', '~> 0.7'
-  gem.add_development_dependency 'minitest', '~> 4.7'
-  gem.add_development_dependency 'turn', '~> 0.9'
-  gem.add_development_dependency 'pry-rescue', '~> 1.1'
 
   gem.files         = Dir.glob("lib/**/*") + Dir.glob("ext/**/*") + Dir.glob('*.gemspec') +
     %w(Rakefile README.md) + Dir.glob('spec/**/*') + Dir.glob("vendor/**/*")
