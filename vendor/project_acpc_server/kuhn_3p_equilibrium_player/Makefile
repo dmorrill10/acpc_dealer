@@ -68,9 +68,27 @@ $(TEST2_RUNNER):
 $(TEST2): $(TARGET) $(TEST2_RUNNER)
 	$(BUILD_PREFIX) $(INC_DIRS) $(SYMBOLS) $(TARGET_SRC) $(PROJECT_SRC) $(TEST_SUPPORT_DIR)/test_helper.c $(UNITY_DIR)/src/unity.c $(TEST2_SRC) $(TEST2_RUNNER) $(LIBS) -o $(TEST2)
 
-test: $(TEST1) $(TEST2)
+# Test 3
+#-------------
+TEST3_BASE := $(TEST_BASE)_sub_family_2
+TEST3_SRC := $(TEST3_BASE).c
+TEST3 := $(TEST3_BASE)$(TEST_EXTENSION)
+TEST3_RUNNER := $(TEST3_BASE)_Runner.c
+
+$(TEST3_RUNNER):
+	ruby $(UNITY_DIR)/auto/generate_test_runner.rb $(TEST3_SRC) $(TEST3_RUNNER)
+
+$(TEST3): $(TARGET) $(TEST3_RUNNER)
+	$(BUILD_PREFIX) $(INC_DIRS) $(SYMBOLS) $(TARGET_SRC) $(PROJECT_SRC) $(TEST_SUPPORT_DIR)/test_helper.c $(UNITY_DIR)/src/unity.c $(TEST3_SRC) $(TEST3_RUNNER) $(LIBS) -o $(TEST3)
+
+
+# Test
+#-----------------
+test: $(TEST1) $(TEST2) $(TEST3)
 	$(TEST1)
 	$(TEST2)
+	$(TEST3)
+
 
 # Clean
 #-----------------------------------

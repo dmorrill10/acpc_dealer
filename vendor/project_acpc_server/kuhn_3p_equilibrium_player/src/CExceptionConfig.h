@@ -1,6 +1,8 @@
 #ifndef _EXCEPTION_H
 #define _EXCEPTION_H
 
+#include <stdlib.h>
+
 #define CEXCEPTION_NO_CATCH_HANDLER(id) exit(id)
 
 // Multi-Tasking environments will need a couple of macros defined to make this library
