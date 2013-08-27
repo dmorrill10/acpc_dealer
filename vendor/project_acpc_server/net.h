@@ -7,6 +7,7 @@ Copyright (C) 2011 by the Computer Poker Research Group, University of Alberta
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 

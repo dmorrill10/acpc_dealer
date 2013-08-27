@@ -93,6 +93,14 @@ static const float SUB_FAMILY_DEFINING_PARAM_VALUES[] = {0.0, 1/2.0};
 // Functions -----------------
 double beta(const double b11, const double b21);
 kuhn_3p_equilibrium_player_t init_private_info(const Game const* game_def, const char const* arg_string);
-double* action_probs(kuhn_3p_equilibrium_player_t player, MatchState view);
+Action action(
+    kuhn_3p_equilibrium_player_t* player,
+    MatchState view
+);
+void action_probs(
+    const kuhn_3p_equilibrium_player_t const* player,
+    MatchState view,
+    double* probs
+);
 
 #endif

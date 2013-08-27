@@ -14,7 +14,6 @@
 #include <math.h>
 #include <assert.h>
 
-#define CEXCEPTION_USE_CONFIG_FILE
 #include "CException.h"
 void print_and_throw_error(const char const *message)
 {
@@ -177,6 +176,7 @@ void parse_arg_string(
 {
   assert(kuhn_3p_e_player);
   assert(arg_string);
+
   if (!(sscanf(arg_string, "%lf", &(kuhn_3p_e_player->params[C11_INDEX])) == 1))
   {
     print_and_throw_error(
@@ -204,7 +204,7 @@ void parse_arg_string(
     return;
   }
 
-  uint i = 0;
+  size_t i = 0;
   for (; i < NUM_PARAMS; ++i) {
     if (
         kuhn_3p_e_player->params[i] < 0.0 ||
@@ -218,49 +218,62 @@ void parse_arg_string(
   return;
 }
 
-double* action_probs_p0(uint8_t card, State state)
+void action_probs_p0(uint8_t card, const State const* state, double* probs)
 {
-  uint situation_index = 0;
-  double probs[NUM_ACTION_TYPES];
-  memset(probs, 0, NUM_ACTION_TYPES * sizeof(*probs));
+  assert(probs);
+  assert(state);
 
-  if (0 == state.numActions[0]) // Situation 1
+  size_t situation_index = 0;
+
+  for (size_t i = 0; i < state->numActions[0]; ++i)
+  {
+    DEBUG_PRINT("actions: %d\n", state->action[0][i].type);
+  }
+
+  if (0 == state->numActions[0]) // Situation 1
   {
     probs[a_fold] = 0.0;
     probs[a_call] = 1.0 - A[card][0];
     probs[a_raise] = A[card][0];
+    return;
 
-    DEBUG_PRINT("A[card][0]: %lf\n", A[card][0]);
-
-    return probs;
-
-  } else if (a_call == state.action[0][1].type) // Situation 2
+  } else if (a_call == state->action[0][1].type) // Situation 2
   {
     situation_index = 1;
-  } else if (a_fold == state.action[0][2].type) // Situation 3
+  } else if (a_fold == state->action[0][2].type) // Situation 3
   {
     situation_index = 2;
   } else // Situation 4
   {
     situation_index = 3;
   }
+
+  DEBUG_PRINT("card: %d, situation_index: %u\n", card, situation_index);
+
   probs[a_fold] = 1.0 - A[card][situation_index];
   probs[a_call] = A[card][situation_index];
   probs[a_raise] = 0.0;
 
-  return probs;
+  return;
 }
 
-double* action_probs_p1(const double const* params, uint8_t card, State state)
+void action_probs_p1(
+    const double const* params,
+    uint8_t card,
+    const State const* state,
+    double* probs
+)
 {
+  assert(params);
+  assert(probs);
+  assert(state);
+
   double param;
-  double probs[NUM_ACTION_TYPES];
-  memset(probs, 0, NUM_ACTION_TYPES * sizeof(*probs));
 
   // Situation 1 or 2
-  if (1 == state.numActions[0])
+  if (1 == state->numActions[0])
   {
-    if (a_call == state.action[0][0].type) // Situation 1
+    if (a_call == state->action[0][0].type) // Situation 1
     {
       switch (card)
       {
@@ -299,7 +312,7 @@ double* action_probs_p1(const double const* params, uint8_t card, State state)
     }
   } else // Situation 3 or 4
   {
-    if (a_fold == state.action[0][3].type) // Situation 3
+    if (a_fold == state->action[0][3].type) // Situation 3
     {
       switch (card)
       {
@@ -338,19 +351,26 @@ double* action_probs_p1(const double const* params, uint8_t card, State state)
   probs[a_call] = param;
   probs[a_raise] = 0.0;
 
-  return probs;
+  return;
 }
 
-double* action_probs_p2(const double const* params, uint8_t card, State state)
+void action_probs_p2(
+    const double const* params,
+    uint8_t card,
+    const State const* state,
+    double* probs
+)
 {
+  assert(params);
+  assert(probs);
+  assert(state);
+
   double param;
-  double probs[NUM_ACTION_TYPES];
-  memset(probs, 0, NUM_ACTION_TYPES * sizeof(*probs));
 
   // Situation 1
-  if (a_call == state.action[0][0].type)
+  if (a_call == state->action[0][0].type)
   {
-    if (a_call == state.action[0][1].type) // Situation 1
+    if (a_call == state->action[0][1].type) // Situation 1
     {
       switch (card)
       {
@@ -370,7 +390,7 @@ double* action_probs_p2(const double const* params, uint8_t card, State state)
       probs[a_call] = 1.0 - param;
       probs[a_raise] = param;
 
-      return probs;
+      return;
     } else // Situation 2
     {
       switch (card)
@@ -390,7 +410,7 @@ double* action_probs_p2(const double const* params, uint8_t card, State state)
     }
   } else // Situation 3 or 4
   {
-    if (a_fold == state.action[0][1].type) // Situation 3
+    if (a_fold == state->action[0][1].type) // Situation 3
     {
       switch (card)
       {
@@ -429,7 +449,7 @@ double* action_probs_p2(const double const* params, uint8_t card, State state)
   probs[a_call] = param;
   probs[a_raise] = 0.0;
 
-  return probs;
+  return;
 }
 
 /*********************************/
@@ -443,15 +463,17 @@ kuhn_3p_equilibrium_player_t init_private_info(const Game const* game_def, const
   assert(game_def);
   assert(arg_string);
 
+  kuhn_3p_equilibrium_player_t kuhn_3p_e_player;
+
   /* This player cannot be used outside of Kuhn poker */
   if(!is_3p_kuhn_poker_game(game_def))
   {
     print_and_throw_error(
         "kuhn_3p_equilibrium_player used in non-Kuhn game\n"
     );
+    return kuhn_3p_e_player;
   }
 
-  kuhn_3p_equilibrium_player_t kuhn_3p_e_player;
   kuhn_3p_e_player.game_def = game_def;
 
   CEXCEPTION_T e = 0;
@@ -471,11 +493,19 @@ kuhn_3p_equilibrium_player_t init_private_info(const Game const* game_def, const
 }
 
 /* return a (valid!) action at the information state described by view */
-Action action(kuhn_3p_equilibrium_player_t player, MatchState view)
+Action action(
+    kuhn_3p_equilibrium_player_t* player,
+    MatchState view
+)
 {
-  double* probs = action_probs(player, view);
+  assert(player);
 
-  double r = genrand_real2(&player.get_action_rng);
+  double probs[NUM_ACTION_TYPES];
+  memset(probs, 0, NUM_ACTION_TYPES * sizeof(*probs));
+
+  action_probs(player, view, probs);
+
+  double r = genrand_real2(&player->get_action_rng);
   enum ActionType i = a_fold;
   for(; i < NUM_ACTION_TYPES; i++) {
     if(r <= probs[i]) {
@@ -492,33 +522,40 @@ Action action(kuhn_3p_equilibrium_player_t player, MatchState view)
 /* Returns a distribution of actions in action_triple
    This is an extra function, and does _NOT_ need to be implemented
    to be considered a valid player.h interface. */
-double* action_probs(
-    kuhn_3p_equilibrium_player_t player,
-    MatchState view
+void action_probs(
+    const kuhn_3p_equilibrium_player_t const* player,
+    MatchState view,
+    double* probs
 )
 {
+  assert(player);
+  assert(probs);
+
   uint8_t card = view.state.holeCards[view.viewingPlayer][0];
 
   switch (view.viewingPlayer)
   {
   case 0:
-    return action_probs_p0(card, view.state);
+    action_probs_p0(card, &view.state, probs);
+    return;
   case 1:
-    return action_probs_p1(player.params, card, view.state);
+    action_probs_p1(player->params, card, &view.state, probs);
+    return;
   case 2:
-    return action_probs_p2(player.params, card, view.state);
+    action_probs_p2(player->params, card, &view.state, probs);
+    return;
   default:
     print_and_throw_error(
         "kuhn_3p_equilibrium_player: action probabilities "
         "requested for an out of bounds seat.\n"
     );
-    return NULL;
+    return;
   }
-  return NULL; // Should never be reached
+  return;
 
 //  if(view.viewingPlayer == 0)
 //  {
-//    if(view.state.num_actions[ 0 ] == 0) {
+//    if(view.state->num_actions[ 0 ] == 0) {
 //      /* We are in the case of <card><unknown_card> no actions */
 //      if(card == JACK) {
 //        action_probs[a_fold] = 0.0;
@@ -558,7 +595,7 @@ double* action_probs(
 //  } else {
 //    /* Player 2 action probs*/
 //    /* We are in <unknown_card><card> pass */
-//    if(view.state.action[ 0 ][ 0 ] == a_call) {
+//    if(view.state->action[ 0 ][ 0 ] == a_call) {
 //      if(card == JACK) {
 //        action_probs[a_fold] = 0.0;
 //        action_probs[a_call] = 1.0 - uplayer>params[ XI ];

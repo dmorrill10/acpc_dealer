@@ -1,12 +1,8 @@
-#include <unity.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 
 #include "test_helper.h"
-
-#define CEXCEPTION_USE_CONFIG_FILE
-#include "CException.h"
 
 #include "kuhn_3p_equilibrium_player.h"
 

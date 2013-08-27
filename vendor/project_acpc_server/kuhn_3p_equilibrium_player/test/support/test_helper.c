@@ -20,8 +20,8 @@ MatchState init_match_state(
     const Game const* game_def,
     uint8_t position,
     uint8_t card,
-    Action* actions,
-    uint num_actions
+    const enum ActionType const* actions,
+    size_t num_actions
 )
 {
   MatchState view;
@@ -30,10 +30,9 @@ MatchState init_match_state(
   view.state.actingPlayer[0][num_actions -1] = position;
   view.state.numActions[0] = num_actions;
 
-  uint i = 0;
-  for (; i < num_actions; ++i)
+  for (size_t i = 0; i < num_actions; ++i)
   {
-    view.state.action[0][i] = actions[i];
+    view.state.action[0][i].type = actions[i];
   }
   view.state.holeCards[position][0] = card;
 

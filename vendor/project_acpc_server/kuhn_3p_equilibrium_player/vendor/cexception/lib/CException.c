@@ -1,4 +1,3 @@
-#define CEXCEPTION_USE_CONFIG_FILE
 #include "CException.h"
 
 volatile CEXCEPTION_FRAME_T CExceptionFrames[CEXCEPTION_NUM_ID] = { 0 };
