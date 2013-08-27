@@ -30,7 +30,8 @@ void test_init_private_info_throws_error_when_game_def_not_kuhn()
 
   Try
   {
-    init_private_info(&game_def, "0.1 0.1 0.1 0.1 0.1 12");
+    double params[NUM_PARAMS] = {0.1};
+    init_private_info(&game_def, params, 12);
     TEST_FAIL_MESSAGE("Should Have Thrown An Error");
   }
   Catch(e)
@@ -47,37 +48,16 @@ void test_init_private_info_does_not_crash()
 
   Try
   {
+    double params[NUM_PARAMS] = {0.1};
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0.1 0.1 0.1 0.1 0.1 12"
+        params,
+        12
     );
   }
   Catch(e)
   {
     TEST_FAIL_MESSAGE("Should Not Have Thrown An Error");
-  }
-}
-
-void test_unspecified_params_can_be_specified_by_init_string()
-{
-  Game game_def = init_kuhn_poker_game_def();
-  TEST_IGNORE_MESSAGE("IMPLEMENT");
-}
-
-void test_empty_param_string_throws_error()
-{
-  Game game_def = init_kuhn_poker_game_def();
-
-  CEXCEPTION_T e = 0;
-
-  Try
-  {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(&game_def, "");
-    TEST_FAIL_MESSAGE("Should Have Thrown An Error");
-  }
-  Catch(e)
-  {
-    TEST_ASSERT_EQUAL(1, e);
   }
 }
 
@@ -89,9 +69,18 @@ void test_out_of_bounds_c11_throws_error()
 
   Try
   {
+    double params[NUM_PARAMS] = {0};
+    params[C11_INDEX] = 0.51;
+    params[B11_INDEX] = 0.25;
+    params[B21_INDEX] = 0.25;
+    params[B32_INDEX] = 0.9375;
+    params[C33_INDEX] = 0.0;
+    params[C34_INDEX] = 1.0;
+
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0.51 0.25 0.25 0.9375 0.0 12"
+        params,
+        12
     );
     TEST_FAIL_MESSAGE("Should Have Thrown An Error");
   }
@@ -107,18 +96,24 @@ void test_param_invalid_probability_throws_error()
 
   CEXCEPTION_T e = 0;
 
-  char valid_params[] = "0.0 0.0 0.0"; // Sub-family 3 for simplicity
-  char params[256];
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
 
   for (float invalid_param = -0.1; invalid_param < 2.0; invalid_param += 2.0)
   {
     Try
     {
-      memset(params, 0, strlen(valid_params) * sizeof(*params));
-      sprintf(params, "%f3 %s", invalid_param, valid_params);
+      params[C34_INDEX] = invalid_param;
+
       kuhn_3p_equilibrium_player_t patient = init_private_info(
           &game_def,
-          params
+          params,
+          12
       );
       TEST_FAIL_MESSAGE("Should Have Thrown An Error");
     }
@@ -133,6 +128,14 @@ void test_action_probs_in_position_A()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
   CEXCEPTION_T e = 0;
 
   Try
@@ -140,7 +143,8 @@ void test_action_probs_in_position_A()
     // @todo Loop with a string (or strings) from each sub-family
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0 0.25 0.25 0.9375 0.0 1 12"
+        params,
+        12
     );
 
     size_t num_actions = 0;
@@ -243,6 +247,14 @@ void test_action_probs_in_position_B()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
   CEXCEPTION_T e = 0;
 
   Try
@@ -250,7 +262,8 @@ void test_action_probs_in_position_B()
     // @todo Loop with a string (or strings) from each sub-family
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0 0.25 0.25 0.9375 0.0 1 12"
+        params,
+        12
     );
 
     double probs[NUM_ACTION_TYPES];
@@ -417,6 +430,14 @@ void test_action_probs_in_position_C()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
   CEXCEPTION_T e = 0;
 
   Try
@@ -424,7 +445,8 @@ void test_action_probs_in_position_C()
     // @todo Loop with a string (or strings) from each sub-family
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0 0.25 0.25 0.9375 0.0 1 12"
+        params,
+        12
     );
     double probs[NUM_ACTION_TYPES];
     memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));

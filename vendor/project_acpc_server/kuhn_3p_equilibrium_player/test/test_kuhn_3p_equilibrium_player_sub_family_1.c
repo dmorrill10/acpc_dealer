@@ -26,13 +26,22 @@ void test_params_set_properly()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
   CEXCEPTION_T e = 0;
 
   Try
   {
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0 0.25 0.25 0.9375 0.0 1 12"
+        params,
+        12
     );
 
     TEST_ASSERT_EQUAL_FLOAT(0.0, patient.params[C11_INDEX]);
@@ -61,13 +70,22 @@ void test_b21_upper_bound()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.26;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
   CEXCEPTION_T e = 0;
 
   Try
   {
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0 0.25 0.26 0.9375 0.0 12"
+        params,
+        12
     );
     TEST_FAIL_MESSAGE("Should Have Thrown An Error");
   }
@@ -81,13 +99,22 @@ void test_b11_upper_bound()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.24;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
   CEXCEPTION_T e = 0;
 
   Try
   {
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0 0.25 0.24 0.9375 0.0 12"
+        params,
+        12
     );
     TEST_FAIL_MESSAGE("Should Have Thrown An Error");
       }
@@ -101,13 +128,22 @@ void test_b32_upper_bound()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.9376;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
   CEXCEPTION_T e = 0;
 
   Try
   {
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0 0.25 0.25 0.9376 0.0 12"
+        params,
+        12
     );
     TEST_FAIL_MESSAGE("Should Have Thrown An Error");
   }
@@ -121,13 +157,22 @@ void test_c33_lower_bound()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.4;
+  params[C33_INDEX] = 0.098;
+  params[C34_INDEX] = 1.0;
+
   CEXCEPTION_T e = 0;
 
   Try
   {
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0 0.25 0.25 0.4 0.098 12"
+        params,
+        12
     );
     TEST_FAIL_MESSAGE("Should Have Thrown An Error");
   }
@@ -141,13 +186,22 @@ void test_c33_upper_bound()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.4;
+  params[C33_INDEX] = 0.54;
+  params[C34_INDEX] = 0.0;
+
   CEXCEPTION_T e = 0;
 
   Try
   {
     kuhn_3p_equilibrium_player_t patient = init_private_info(
         &game_def,
-        "0 0.25 0.25 0.4 0.54 12"
+        params,
+        12
     );
     TEST_FAIL_MESSAGE("Should Have Thrown An Error");
   }

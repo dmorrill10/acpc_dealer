@@ -14,13 +14,6 @@
 #include "net.h"
 
 // Types ----------------
-typedef struct {
-  uint32_t seed;
-  rng_state_t get_action_rng;
-  const Game* game_def;
-  double params[ 10 ];
-} kuhn_3p_equilibrium_player_t;
-
 typedef enum {
   C11_INDEX = 0,
   B11_INDEX,
@@ -34,6 +27,13 @@ typedef enum {
   C34_INDEX,
   NUM_PARAMS
 } parameter_index_t;
+
+typedef struct {
+  uint32_t seed;
+  rng_state_t get_action_rng;
+  const Game* game_def;
+  double params[NUM_PARAMS];
+} kuhn_3p_equilibrium_player_t;
 
 typedef enum{JACK = 0, QUEEN, KING, ACE} card_t;
 
@@ -92,7 +92,12 @@ static const float SUB_FAMILY_DEFINING_PARAM_VALUES[] = {0.0, 1/2.0};
 
 // Functions -----------------
 double beta(const double b11, const double b21);
-kuhn_3p_equilibrium_player_t init_private_info(const Game const* game_def, const char const* arg_string);
+size_t sub_family_number(double c11);
+kuhn_3p_equilibrium_player_t init_private_info(
+    const Game const* game_def,
+    const double const* params,
+    uint32_t seed
+);
 Action action(
     kuhn_3p_equilibrium_player_t* player,
     MatchState view

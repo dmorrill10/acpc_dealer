@@ -44,27 +44,18 @@ double beta(double b11, double b21)
   return fmax(b11, b21);
 }
 
-int sub_family_number(const kuhn_3p_equilibrium_player_t const* kuhn_3p_e_player)
+size_t sub_family_number(double c11)
 {
-  assert(kuhn_3p_e_player);
-
-  int sub_family_index = 0;
-  for (; sub_family_index < NUM_SUB_FAMILIES - 1; ++sub_family_index)
+  for (size_t sub_family_index = 0; sub_family_index < NUM_SUB_FAMILIES - 1; ++sub_family_index)
   {
-    if (
-        kuhn_3p_e_player->params[SUB_FAMILY_DEFINING_PARAM_INDEX] ==
-        SUB_FAMILY_DEFINING_PARAM_VALUES[sub_family_index]
-    )
+    if (c11 == SUB_FAMILY_DEFINING_PARAM_VALUES[sub_family_index])
     {
       // c11 is 0 or 1/2
       return sub_family_index + 1;
     }
   }
 
-  if (
-      kuhn_3p_e_player->params[SUB_FAMILY_DEFINING_PARAM_INDEX] >
-      SUB_FAMILY_DEFINING_PARAM_VALUES[NUM_SUB_FAMILIES - 2]
-  )
+  if (c11 > SUB_FAMILY_DEFINING_PARAM_VALUES[NUM_SUB_FAMILIES - 2])
   {
     return NUM_SUB_FAMILIES + 1; // Illegal sub-family number
   }
@@ -73,32 +64,12 @@ int sub_family_number(const kuhn_3p_equilibrium_player_t const* kuhn_3p_e_player
   return NUM_SUB_FAMILIES;
 }
 
-void extract_family_1_params(
-    kuhn_3p_equilibrium_player_t* kuhn_3p_e_player,
-    const char const* arg_string
+void check_family_1_params(
+    kuhn_3p_equilibrium_player_t* kuhn_3p_e_player
 )
 {
   assert(kuhn_3p_e_player);
-  assert(arg_string);
-  if (
-      sscanf(
-          arg_string,
-          "%lf %lf %lf %lf %lf %lf %"SCNu32,
-          &(kuhn_3p_e_player->params[C11_INDEX]),
-          &(kuhn_3p_e_player->params[SUB_FAMILY_1_INDEPENDENT_PARAMS[0]]),
-          &(kuhn_3p_e_player->params[SUB_FAMILY_1_INDEPENDENT_PARAMS[1]]),
-          &(kuhn_3p_e_player->params[SUB_FAMILY_1_INDEPENDENT_PARAMS[2]]),
-          &(kuhn_3p_e_player->params[SUB_FAMILY_1_INDEPENDENT_PARAMS[3]]),
-          &(kuhn_3p_e_player->params[SUB_FAMILY_1_INDEPENDENT_PARAMS[4]]),
-          &(kuhn_3p_e_player->seed)
-      ) != 7
-     )
-  {
-    print_and_throw_error(
-        "kuhn_3p_equilibrium_player: not enough parameters found for a "
-        "sub-family 1 equilibrium\n"
-    );
-  }
+
   if (kuhn_3p_e_player->params[B21_INDEX] > 1/4.0)
   {
     print_and_throw_error(
@@ -169,32 +140,24 @@ void extract_family_1_params(
   return;
 }
 
-void parse_arg_string(
-    kuhn_3p_equilibrium_player_t* kuhn_3p_e_player,
-    const char const* arg_string
-)
+void check_params(kuhn_3p_equilibrium_player_t* kuhn_3p_e_player)
 {
   assert(kuhn_3p_e_player);
-  assert(arg_string);
 
-  if (!(sscanf(arg_string, "%lf", &(kuhn_3p_e_player->params[C11_INDEX])) == 1))
-  {
-    print_and_throw_error(
-        "kuhn_3p_equilibrium_player: c11 parameter not found in argument "
-        "string\n"
-    );
-  }
-
-  switch (sub_family_number(kuhn_3p_e_player))
+  switch (
+      sub_family_number(
+          kuhn_3p_e_player->params[SUB_FAMILY_DEFINING_PARAM_INDEX]
+      )
+  )
   {
   case 1:
-    extract_family_1_params(kuhn_3p_e_player, arg_string);
+    check_family_1_params(kuhn_3p_e_player);
     break;
   case 2:
-//    extract_family_2_params(kuhn_3p_e_player, arg_string);
+//    check_family_2_params(kuhn_3p_e_player);
     break;
   case 3:
-//    extract_family_3_params(kuhn_3p_e_player, arg_string);
+//    check_family_3_params(kuhn_3p_e_player);
     break;
   default:
     print_and_throw_error(
@@ -204,8 +167,7 @@ void parse_arg_string(
     return;
   }
 
-  size_t i = 0;
-  for (; i < NUM_PARAMS; ++i) {
+  for (size_t i = 0; i < NUM_PARAMS; ++i) {
     if (
         kuhn_3p_e_player->params[i] < 0.0 ||
         kuhn_3p_e_player->params[i] > 1.0
@@ -225,11 +187,6 @@ void action_probs_p0(uint8_t card, const State const* state, double* probs)
 
   size_t situation_index = 0;
 
-  for (size_t i = 0; i < state->numActions[0]; ++i)
-  {
-    DEBUG_PRINT("actions: %d\n", state->action[0][i].type);
-  }
-
   if (0 == state->numActions[0]) // Situation 1
   {
     probs[a_fold] = 0.0;
@@ -247,8 +204,6 @@ void action_probs_p0(uint8_t card, const State const* state, double* probs)
   {
     situation_index = 3;
   }
-
-  DEBUG_PRINT("card: %d, situation_index: %u\n", card, situation_index);
 
   probs[a_fold] = 1.0 - A[card][situation_index];
   probs[a_call] = A[card][situation_index];
@@ -458,10 +413,14 @@ void action_probs_p2(
 
 /* create any private space needed for future calls
    game_def is a private copy allocated by the dealer for the player's use */
-kuhn_3p_equilibrium_player_t init_private_info(const Game const* game_def, const char const* arg_string)
+kuhn_3p_equilibrium_player_t init_private_info(
+    const Game const* game_def,
+    const double const* params,
+    uint32_t seed
+)
 {
   assert(game_def);
-  assert(arg_string);
+  assert(params);
 
   kuhn_3p_equilibrium_player_t kuhn_3p_e_player;
 
@@ -476,10 +435,22 @@ kuhn_3p_equilibrium_player_t init_private_info(const Game const* game_def, const
 
   kuhn_3p_e_player.game_def = game_def;
 
+  memset(
+      kuhn_3p_e_player.params,
+      0,
+      NUM_PARAMS * sizeof(*kuhn_3p_e_player.params)
+  );
+  for (size_t i = 0; i < NUM_PARAMS; ++i)
+  {
+    kuhn_3p_e_player.params[i] = params[i];
+  }
+
+  kuhn_3p_e_player.seed = seed;
+
   CEXCEPTION_T e = 0;
   Try
   {
-    parse_arg_string(&kuhn_3p_e_player, arg_string);
+    check_params(&kuhn_3p_e_player);
   }
   Catch(e)
   {
