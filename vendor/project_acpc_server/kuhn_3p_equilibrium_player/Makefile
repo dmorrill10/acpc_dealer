@@ -2,7 +2,7 @@ THIS_DIR := $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST)))
 PROJECT_DIR := $(THIS_DIR)/../
 
 CC = gcc -std=gnu99
-CFLAGS = -O3 -Wall
+CFLAGS = -O3 -Wall -pg -g
 LIBS = -lm
 TARGET_SYMBOLS = -DCEXCEPTION_USE_CONFIG_FILE
 
@@ -15,7 +15,8 @@ CEXCEPTION_LIB := $(CEXCEPTION_DIR)/lib
 CEXCEPTION_SRC := $(CEXCEPTION_LIB)/CException.c
 
 TARGET_BASE = kuhn_3p_equilibrium_player
-TARGET_SRC := $(THIS_DIR)/src/$(TARGET_BASE).c $(CEXCEPTION_SRC)
+TARGET_SRC_DIR := $(THIS_DIR)/src
+TARGET_SRC := $(TARGET_SRC_DIR)/$(TARGET_BASE).c $(CEXCEPTION_SRC) 
 
 PROJECT_SRC := $(PROJECT_DIR)/game.c $(PROJECT_DIR)/rng.c $(PROJECT_DIR)/net.c
 
@@ -28,7 +29,7 @@ all: clean test
 TARGET := $(THIS_DIR)/$(TARGET_BASE)
 
 $(TARGET): $(TARGET_SRC) $(PROJECT_DIR)/evalHandTables $(PROJECT_DIR)/game.h $(PROJECT_DIR)/net.h $(PROJECT_DIR)/rng.h
-	$(BUILD_PREFIX) $(TARGET_INCLUDES) $(TARGET_SRC) $(THIS_DIR)/src/main.c $(COMMANDER_DIR)/src/commander.c $(LIBS) -o $@ $(PROJECT_SRC)
+	$(BUILD_PREFIX) $(TARGET_INCLUDES) $(TARGET_SRC) $(TARGET_SRC_DIR)/main.c $(TARGET_SRC_DIR)/player_config.c $(TARGET_SRC_DIR)/dealer_connection.c $(COMMANDER_DIR)/src/commander.c $(LIBS) -o $@ $(PROJECT_SRC)
 	chmod 755 $@
 
 # Testing
@@ -85,6 +86,17 @@ $(TEST3_RUNNER):
 $(TEST3): $(TARGET) $(TEST3_RUNNER)
 	$(BUILD_PREFIX) $(SYMBOLS) $(INC_DIRS) $(TARGET_SRC) $(PROJECT_SRC) $(TEST_SUPPORT_DIR)/test_helper.c $(UNITY_DIR)/src/unity.c $(TEST3_SRC) $(TEST3_RUNNER) $(LIBS) -o $(TEST3)
 
+# Manual test with the dealer
+#-------------------------------
+$(PROJECT_DIR)/dealer:
+	cd $(PROJECT_DIR) && make
+
+dealer_test: $(PROJECT_DIR)/dealer
+	cd $(PROJECT_DIR) && ./dealer m kuhn.limit.3p.game 100 1 p1 p2 p3 &
+	sleep 0.1
+	./kuhn_3p_equilibrium_player -0 0.0 -1 0.25 -2 0.25 -4 0.9375 --c33 0.0 --c34 1.0 -p 18791 -g ../kuhn.limit.3p.game & # Sub-family 1
+	./kuhn_3p_equilibrium_player -0 0.0 -1 0.25 -2 0.25 -4 0.9375 --c33 0.0 --c34 1.0 -p 18374 -g ../kuhn.limit.3p.game &
+	./kuhn_3p_equilibrium_player -0 0.0 -1 0.25 -2 0.25 -4 0.9375 --c33 0.0 --c34 1.0 -p 59497 -g ../kuhn.limit.3p.game &
 
 # Test
 #-----------------

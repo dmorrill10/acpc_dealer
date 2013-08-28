@@ -154,10 +154,10 @@ void test_action_probs_in_position_A()
 
     enum ActionType actions1[] = {};
     enum ActionType actions2[] = {a_call, a_call, a_raise};
-    enum ActionType actions3[] = {a_call, a_raise, a_fold};//////////////
+    enum ActionType actions3[] = {a_call, a_raise, a_fold};
     enum ActionType actions4[] = {a_call, a_raise, a_call};
 
-    for (uint8_t card = JACK; card <= ACE; ++card)
+    for (card_rank_t card_rank = JACK_RANK; card_rank <= ACE_RANK; ++card_rank)
     {
       // Situation 1
       num_actions = 0;
@@ -168,7 +168,7 @@ void test_action_probs_in_position_A()
           init_match_state(
               &game_def,
               A_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions1,
               num_actions
           ),
@@ -176,8 +176,8 @@ void test_action_probs_in_position_A()
       );
 
       TEST_ASSERT_EQUAL_FLOAT(0.0, probs[a_fold]);
-      TEST_ASSERT_EQUAL_FLOAT(1 - A[card][0], probs[a_call]);
-      TEST_ASSERT_EQUAL_FLOAT(A[card][0], probs[a_raise]);
+      TEST_ASSERT_EQUAL_FLOAT(1 - A[card_rank - JACK_RANK][0], probs[a_call]);
+      TEST_ASSERT_EQUAL_FLOAT(A[card_rank - JACK_RANK][0], probs[a_raise]);
 
       // Situation 2
       num_actions = 3;
@@ -188,14 +188,14 @@ void test_action_probs_in_position_A()
           init_match_state(
               &game_def,
               A_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions2,
               num_actions
           ),
           probs
       );
-      TEST_ASSERT_EQUAL_FLOAT(1 - A[card][1], probs[a_fold]);
-      TEST_ASSERT_EQUAL_FLOAT(A[card][1], probs[a_call]);
+      TEST_ASSERT_EQUAL_FLOAT(1 - A[card_rank - JACK_RANK][1], probs[a_fold]);
+      TEST_ASSERT_EQUAL_FLOAT(A[card_rank - JACK_RANK][1], probs[a_call]);
       TEST_ASSERT_EQUAL_FLOAT(0.0, probs[a_raise]);
 
       // Situation 3
@@ -207,14 +207,14 @@ void test_action_probs_in_position_A()
           init_match_state(
               &game_def,
               A_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions3,
               num_actions
           ),
           probs
       );
-      TEST_ASSERT_EQUAL_FLOAT(1 - A[card][2], probs[a_fold]);
-      TEST_ASSERT_EQUAL_FLOAT(A[card][2], probs[a_call]);
+      TEST_ASSERT_EQUAL_FLOAT(1 - A[card_rank - JACK_RANK][2], probs[a_fold]);
+      TEST_ASSERT_EQUAL_FLOAT(A[card_rank - JACK_RANK][2], probs[a_call]);
       TEST_ASSERT_EQUAL_FLOAT(0.0, probs[a_raise]);
 
       // Situation 4
@@ -226,14 +226,14 @@ void test_action_probs_in_position_A()
           init_match_state(
               &game_def,
               A_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions4,
               num_actions
           ),
           probs
       );
-      TEST_ASSERT_EQUAL_FLOAT(1 - A[card][3], probs[a_fold]);
-      TEST_ASSERT_EQUAL_FLOAT(A[card][3], probs[a_call]);
+      TEST_ASSERT_EQUAL_FLOAT(1 - A[card_rank - JACK_RANK][3], probs[a_fold]);
+      TEST_ASSERT_EQUAL_FLOAT(A[card_rank - JACK_RANK][3], probs[a_call]);
       TEST_ASSERT_EQUAL_FLOAT(0.0, probs[a_raise]);
     }
   }
@@ -281,21 +281,21 @@ void test_action_probs_in_position_B()
     };
     double param;
 
-    for (uint8_t card = JACK; card <= ACE; ++card)
+    for (card_rank_t card_rank = JACK_RANK; card_rank <= ACE_RANK; ++card_rank)
     {
       // Situation 1
       num_actions = 1;
       memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
 
-      switch (card)
+      switch (card_rank)
       {
-      case JACK:
+      case JACK_RANK:
         param = patient.params[B11_INDEX];
         break;
-      case QUEEN:
+      case QUEEN_RANK:
         param = patient.params[B21_INDEX];
         break;
-      case KING:
+      case KING_RANK:
         param = B31;
         break;
       default:
@@ -306,7 +306,7 @@ void test_action_probs_in_position_B()
           init_match_state(
               &game_def,
               B_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions1,
               num_actions
           ),
@@ -321,15 +321,15 @@ void test_action_probs_in_position_B()
       num_actions = 1;
       memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
 
-      switch (card)
+      switch (card_rank)
       {
-      case JACK:
+      case JACK_RANK:
         param = B12;
         break;
-      case QUEEN:
+      case QUEEN_RANK:
         param = B22;
         break;
-      case KING:
+      case KING_RANK:
         param = patient.params[B32_INDEX];
         break;
       default:
@@ -340,7 +340,7 @@ void test_action_probs_in_position_B()
           init_match_state(
               &game_def,
               B_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions2,
               num_actions
           ),
@@ -355,15 +355,15 @@ void test_action_probs_in_position_B()
       num_actions = 4;
       memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
 
-      switch (card)
+      switch (card_rank)
       {
-      case JACK:
+      case JACK_RANK:
         param = B13;
         break;
-      case QUEEN:
+      case QUEEN_RANK:
         param = patient.params[B23_INDEX];
         break;
-      case KING:
+      case KING_RANK:
         param = patient.params[B33_INDEX];
         break;
       default:
@@ -374,7 +374,7 @@ void test_action_probs_in_position_B()
           init_match_state(
               &game_def,
               B_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions3,
               num_actions
           ),
@@ -389,15 +389,15 @@ void test_action_probs_in_position_B()
       num_actions = 4;
       memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
 
-      switch (card)
+      switch (card_rank)
       {
-      case JACK:
+      case JACK_RANK:
         param = B14;
         break;
-      case QUEEN:
+      case QUEEN_RANK:
         param = B24;
         break;
-      case KING:
+      case KING_RANK:
         param = B34;
         break;
       default:
@@ -408,7 +408,7 @@ void test_action_probs_in_position_B()
           init_match_state(
               &game_def,
               B_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions4,
               num_actions
           ),
@@ -459,20 +459,20 @@ void test_action_probs_in_position_C()
     enum ActionType actions4[] = {a_raise, a_call};
     double param;
 
-    for (uint8_t card = JACK; card <= ACE; ++card)
+    for (card_rank_t card_rank = JACK_RANK; card_rank <= ACE_RANK; ++card_rank)
     {
       // Situation 1
       memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
 
-      switch (card)
+      switch (card_rank)
       {
-      case JACK:
+      case JACK_RANK:
         param = patient.params[C11_INDEX];
         break;
-      case QUEEN:
+      case QUEEN_RANK:
         param = patient.params[C21_INDEX];
         break;
-      case KING:
+      case KING_RANK:
         param = C31;
         break;
       default:
@@ -483,7 +483,7 @@ void test_action_probs_in_position_C()
           init_match_state(
               &game_def,
               C_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions1,
               num_actions
           ),
@@ -497,15 +497,15 @@ void test_action_probs_in_position_C()
       // Situation 2
       memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
 
-      switch (card)
+      switch (card_rank)
       {
-      case JACK:
+      case JACK_RANK:
         param = C12;
         break;
-      case QUEEN:
+      case QUEEN_RANK:
         param = C22;
         break;
-      case KING:
+      case KING_RANK:
         param = C32;
         break;
       default:
@@ -516,7 +516,7 @@ void test_action_probs_in_position_C()
           init_match_state(
               &game_def,
               C_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions2,
               num_actions
           ),
@@ -530,15 +530,15 @@ void test_action_probs_in_position_C()
       // Situation 3
       memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
 
-      switch (card)
+      switch (card_rank)
       {
-      case JACK:
+      case JACK_RANK:
         param = C13;
         break;
-      case QUEEN:
+      case QUEEN_RANK:
         param = C23;
         break;
-      case KING:
+      case KING_RANK:
         param = patient.params[C33_INDEX];
         break;
       default:
@@ -549,7 +549,7 @@ void test_action_probs_in_position_C()
           init_match_state(
               &game_def,
               C_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions3,
               num_actions
           ),
@@ -563,15 +563,15 @@ void test_action_probs_in_position_C()
       // Situation 4
       memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
 
-      switch (card)
+      switch (card_rank)
       {
-      case JACK:
+      case JACK_RANK:
         param = C14;
         break;
-      case QUEEN:
+      case QUEEN_RANK:
         param = C24;
         break;
-      case KING:
+      case KING_RANK:
         param = patient.params[C34_INDEX];
         break;
       default:
@@ -582,7 +582,7 @@ void test_action_probs_in_position_C()
           init_match_state(
               &game_def,
               C_POSITION,
-              card,
+              makeCard(card_rank, KUHN_SUIT),
               actions4,
               num_actions
           ),

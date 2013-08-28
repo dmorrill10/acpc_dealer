@@ -9,19 +9,13 @@
  *              parameters.
  */
 
-#include <limits.h>
-
 #include "game.h"
 #include "rng.h"
 #include "net.h"
 
-// Types ----------------
-typedef struct {
-  char host[HOST_NAME_MAX];
-  FILE *toServer;
-  FILE *fromServer;
-} dealer_connection_t;
+#define DEBUG 0
 
+// Types ----------------
 typedef enum {
   C11_INDEX = 0,
   B11_INDEX,
@@ -43,11 +37,17 @@ typedef struct {
   double params[NUM_PARAMS];
 } kuhn_3p_equilibrium_player_t;
 
-typedef enum{JACK = 0, QUEEN, KING, ACE} card_t;
+typedef enum{JACK_RANK = 9, QUEEN_RANK, KING_RANK, ACE_RANK} card_rank_t;
 
 typedef enum{A_POSITION = 0, B_POSITION, C_POSITION} position_t;
 
 // Constants -------------
+#define KUHN_SUIT 3
+#define JACK makeCard(JACK_RANK, KUHN_SUIT)
+#define QUEEN makeCard(QUEEN_RANK, KUHN_SUIT)
+#define KING makeCard(KING_RANK, KUHN_SUIT)
+#define ACE makeCard(ACE_RANK, KUHN_SUIT)
+
 #define KAPPA (1/24.0)
 
 static const int SUB_FAMILY_1_INDEPENDENT_PARAMS[] = {
@@ -63,40 +63,40 @@ static const int SUB_FAMILY_3_INDEPENDENT_PARAMS[] = {
 };
 
 // Necessary params for P1
-static const float A[][4] = {
-    {0, 0, 0,     0},
-    {0, 0, 0,     0},
-    {0, 0, 1/2.0, 0},
-    {0, 1, 1,     1}
+static const double A[][4] = {
+    {0.0, 0.0, 0.0,   0.0},
+    {0.0, 0.0, 0.0,   0.0},
+    {0.0, 0.0, 1/2.0, 0.0},
+    {0.0, 1.0, 1.0,   1.0}
 };
 
 // Necessary params for P2
-#define B12 0
-#define B13 0
-#define B14 0
-#define B22 0
-#define B24 0
-#define B31 0
-#define B34 0
-#define B42 1
-#define B43 1
-#define B44 1
+#define B12 0.0
+#define B13 0.0
+#define B14 0.0
+#define B22 0.0
+#define B24 0.0
+#define B31 0.0
+#define B34 0.0
+#define B42 1.0
+#define B43 1.0
+#define B44 1.0
 
 // Necessary params for P3
-#define C12 0
-#define C13 0
-#define C14 0
-#define C22 0
-#define C23 0
-#define C24 0
-#define C31 0
-#define C32 0
-static const float C4[] = {1, 1, 1, 1};
+#define C12 0.0
+#define C13 0.0
+#define C14 0.0
+#define C22 0.0
+#define C23 0.0
+#define C24 0.0
+#define C31 0.0
+#define C32 0.0
+static const double C4[] = {1.0, 1.0, 1.0, 1.0};
 
 // Sub-family definitions
 #define NUM_SUB_FAMILIES 3
 #define SUB_FAMILY_DEFINING_PARAM_INDEX C11_INDEX
-static const float SUB_FAMILY_DEFINING_PARAM_VALUES[] = {0.0, 1/2.0};
+static const double SUB_FAMILY_DEFINING_PARAM_VALUES[] = {0.0, 1/2.0};
 
 // Functions -----------------
 double beta(const double b11, const double b21);

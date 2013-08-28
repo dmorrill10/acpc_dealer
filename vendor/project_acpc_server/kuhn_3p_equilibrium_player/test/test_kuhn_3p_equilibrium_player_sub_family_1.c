@@ -210,3 +210,107 @@ void test_c33_upper_bound()
     TEST_ASSERT_EQUAL(1, e);
   }
 }
+
+void test_a24()
+{
+  Game game_def = init_kuhn_poker_game_def();
+
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
+  CEXCEPTION_T e = 0;
+
+  Try
+  {
+    kuhn_3p_equilibrium_player_t patient = init_private_info(
+        &game_def,
+        params,
+        12
+    );
+
+    size_t num_actions = 3;
+
+    double probs[NUM_ACTION_TYPES];
+    memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
+
+    enum ActionType actions[] = {a_call, a_raise, a_call};
+
+    uint8_t card = QUEEN;
+
+    action_probs(
+        &patient,
+        init_match_state(
+            &game_def,
+            A_POSITION,
+            card,
+            actions,
+            num_actions
+        ),
+        probs
+    );
+    TEST_ASSERT_EQUAL_FLOAT(1.0, probs[a_fold]);
+    TEST_ASSERT_EQUAL_FLOAT(0.0, probs[a_call]);
+    TEST_ASSERT_EQUAL_FLOAT(0.0, probs[a_raise]);
+  }
+  Catch(e)
+  {
+    TEST_FAIL_MESSAGE("Should Not Have Thrown An Error");
+  }
+}
+
+void test_a41()
+{
+  Game game_def = init_kuhn_poker_game_def();
+
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
+  CEXCEPTION_T e = 0;
+
+  Try
+  {
+    kuhn_3p_equilibrium_player_t patient = init_private_info(
+        &game_def,
+        params,
+        12
+    );
+
+    double probs[NUM_ACTION_TYPES];
+    memset(probs, -1, NUM_ACTION_TYPES * sizeof(*probs));
+
+    size_t num_actions = 0;
+    enum ActionType actions[] = {};
+
+    uint8_t card = ACE;
+
+    action_probs(
+        &patient,
+        init_match_state(
+            &game_def,
+            A_POSITION,
+            card,
+            actions,
+            num_actions
+        ),
+        probs
+    );
+
+    TEST_ASSERT_EQUAL_FLOAT(0.0, probs[a_fold]);
+    TEST_ASSERT_EQUAL_FLOAT(1.0, probs[a_call]);
+    TEST_ASSERT_EQUAL_FLOAT(0.0, probs[a_raise]);
+  }
+  Catch(e)
+  {
+    TEST_FAIL_MESSAGE("Should Not Have Thrown An Error");
+  }
+}

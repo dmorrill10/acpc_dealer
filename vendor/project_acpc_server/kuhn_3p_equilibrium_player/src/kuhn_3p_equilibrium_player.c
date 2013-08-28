@@ -21,8 +21,10 @@ void print_and_throw_error(const char const *message)
   Throw(1);
 }
 #define DEBUG_PRINT(...) \
+  if (DEBUG) { \
     printf(__VA_ARGS__); \
-    fflush(NULL);
+    fflush(NULL); \
+  }
 
 #include "kuhn_3p_equilibrium_player.h"
 
@@ -180,33 +182,35 @@ void check_params(kuhn_3p_equilibrium_player_t* kuhn_3p_e_player)
   return;
 }
 
-void action_probs_p0(uint8_t card, const State const* state, double* probs)
-{
+void action_probs_p0(
+    uint8_t card_rank,
+    const State const* state,
+    double* probs
+) {
   assert(probs);
   assert(state);
 
   size_t situation_index = 0;
 
-  if (0 == state->numActions[0]) // Situation 1
-  {
-    probs[a_fold] = 0.0;
-    probs[a_call] = 1.0 - A[card][0];
-    probs[a_raise] = A[card][0];
-    return;
+  if (0 == state->numActions[0]) { // Situation 1
+    DEBUG_PRINT("action_probs_p0: situation 1\n");
 
-  } else if (a_call == state->action[0][1].type) // Situation 2
-  {
+    probs[a_fold] = 0.0;
+    probs[a_call] = 1.0 - A[card_rank - JACK_RANK][0];
+    probs[a_raise] = A[card_rank - JACK_RANK][0];
+    return;
+  } else if (a_call == state->action[0][1].type) { // Situation 2
     situation_index = 1;
-  } else if (a_fold == state->action[0][2].type) // Situation 3
-  {
+  } else if (a_fold == state->action[0][2].type) { // Situation 3
     situation_index = 2;
-  } else // Situation 4
-  {
+  } else { // Situation 4
     situation_index = 3;
   }
 
-  probs[a_fold] = 1.0 - A[card][situation_index];
-  probs[a_call] = A[card][situation_index];
+  DEBUG_PRINT("action_probs_p0: situation %u\n", situation_index);
+
+  probs[a_fold] = 1.0 - A[card_rank - JACK_RANK][situation_index];
+  probs[a_call] = A[card_rank - JACK_RANK][situation_index];
   probs[a_raise] = 0.0;
 
   return;
@@ -214,11 +218,10 @@ void action_probs_p0(uint8_t card, const State const* state, double* probs)
 
 void action_probs_p1(
     const double const* params,
-    uint8_t card,
+    uint8_t card_rank,
     const State const* state,
     double* probs
-)
-{
+) {
   assert(params);
   assert(probs);
   assert(state);
@@ -226,77 +229,63 @@ void action_probs_p1(
   double param;
 
   // Situation 1 or 2
-  if (1 == state->numActions[0])
-  {
-    if (a_call == state->action[0][0].type) // Situation 1
-    {
-      switch (card)
-      {
-      case JACK:
+  if (1 == state->numActions[0]) {
+    if (a_call == state->action[0][0].type) { // Situation 1
+
+      DEBUG_PRINT("action_probs_p1: situation 1\n");
+
+      if (JACK_RANK == card_rank) {
         param = params[B11_INDEX];
-        break;
-      case QUEEN:
+      } else if (QUEEN_RANK == card_rank) {
         param = params[B21_INDEX];
-        break;
-      case KING:
+      } else if (KING_RANK == card_rank) {
         param = B31;
-        break;
-      default:
+      } else {
         param = params[B41_INDEX];
       }
       probs[a_fold] = 0.0;
       probs[a_call] = 1.0 - param;
       probs[a_raise] = param;
       return;
-    } else // Situation 2
-    {
-      switch (card)
-      {
-      case JACK:
+    } else { // Situation 2
+
+      DEBUG_PRINT("action_probs_p1: situation 2\n");
+
+      if (JACK_RANK == card_rank) {
         param = B12;
-        break;
-      case QUEEN:
+      } else if (QUEEN_RANK == card_rank) {
         param = B22;
-        break;
-      case KING:
+      } else if (KING_RANK == card_rank) {
         param = params[B32_INDEX];
-        break;
-      default:
+      } else {
         param = B42;
       }
     }
-  } else // Situation 3 or 4
-  {
-    if (a_fold == state->action[0][3].type) // Situation 3
-    {
-      switch (card)
-      {
-      case JACK:
+  } else { // Situation 3 or 4
+    if (a_fold == state->action[0][3].type) { // Situation 3
+
+      DEBUG_PRINT("action_probs_p1: situation 3\n");
+
+      if (JACK_RANK == card_rank) {
         param = B13;
-        break;
-      case QUEEN:
+      } else if (QUEEN_RANK == card_rank) {
         param = params[B23_INDEX];
-        break;
-      case KING:
+      } else if (KING_RANK == card_rank) {
         param = params[B33_INDEX];
-        break;
-      default:
+      } else {
         param = B43;
       }
-    } else // Situation 4
-    {
-      switch (card)
-      {
-      case JACK:
+    } else { // Situation 4
+
+      DEBUG_PRINT("action_probs_p1: situation 4\n");
+
+      if (JACK_RANK == card_rank) {
         param = B14;
-        break;
-      case QUEEN:
+      } else if (QUEEN_RANK == card_rank) {
         param = B24;
-        break;
-      case KING:
+      } else if (KING_RANK == card_rank) {
         param = B34;
-        break;
-      default:
+      } else {
         param = B44;
       }
     }
@@ -311,7 +300,7 @@ void action_probs_p1(
 
 void action_probs_p2(
     const double const* params,
-    uint8_t card,
+    uint8_t card_rank,
     const State const* state,
     double* probs
 )
@@ -323,78 +312,63 @@ void action_probs_p2(
   double param;
 
   // Situation 1
-  if (a_call == state->action[0][0].type)
-  {
-    if (a_call == state->action[0][1].type) // Situation 1
-    {
-      switch (card)
-      {
-      case JACK:
+  if (a_call == state->action[0][0].type) {
+    if (a_call == state->action[0][1].type) { // Situation 1
+
+      DEBUG_PRINT("action_probs_p2: situation 1\n");
+
+      if (JACK_RANK == card_rank) {
         param = params[C11_INDEX];
-        break;
-      case QUEEN:
+      } else if (QUEEN_RANK == card_rank) {
         param = params[C21_INDEX];
-        break;
-      case KING:
+      } else if (KING_RANK == card_rank) {
         param = C31;
-        break;
-      default:
+      } else {
         param = C4[0];
       }
       probs[a_fold] = 0.0;
       probs[a_call] = 1.0 - param;
       probs[a_raise] = param;
-
       return;
-    } else // Situation 2
-    {
-      switch (card)
-      {
-      case JACK:
+    } else { // Situation 2
+
+      DEBUG_PRINT("action_probs_p2: situation 2\n");
+
+      if (JACK_RANK == card_rank) {
         param = C12;
-        break;
-      case QUEEN:
+      } else if (QUEEN_RANK == card_rank) {
         param = C22;
-        break;
-      case KING:
+      } else if (KING_RANK == card_rank) {
         param = C32;
-        break;
-      default:
+      } else {
         param = C4[1];
       }
     }
-  } else // Situation 3 or 4
-  {
-    if (a_fold == state->action[0][1].type) // Situation 3
-    {
-      switch (card)
-      {
-      case JACK:
+  } else { // Situation 3 or 4
+    if (a_fold == state->action[0][1].type) { // Situation 3
+
+      DEBUG_PRINT("action_probs_p2: situation 3\n");
+
+      if (JACK_RANK == card_rank) {
         param = C13;
-        break;
-      case QUEEN:
+      } else if (QUEEN_RANK == card_rank) {
         param = C23;
-        break;
-      case KING:
+      } else if (KING_RANK == card_rank) {
         param = params[C33_INDEX];
-        break;
-      default:
+      } else {
         param = C4[2];
       }
-    } else // Situation 4
-    {
-      switch (card)
-      {
-      case JACK:
+    } else { // Situation 4
+
+      DEBUG_PRINT("action_probs_p2: situation 4\n");
+
+      if (JACK_RANK == card_rank) {
         param = C14;
-        break;
-      case QUEEN:
+      } else if (QUEEN_RANK == card_rank) {
         param = C24;
-        break;
-      case KING:
+      } else if (KING_RANK == card_rank) {
         param = params[C34_INDEX];
-        break;
-      default:
+      } else {
         param = C4[3];
       }
     }
@@ -474,7 +448,21 @@ Action action(
   double probs[NUM_ACTION_TYPES];
   memset(probs, 0, NUM_ACTION_TYPES * sizeof(*probs));
 
+  ////////// @todo
+  DEBUG_PRINT("action: \n================\n");
+  char ms_string[255];
+  printMatchState(player->game_def, &view, 255, ms_string);
+  DEBUG_PRINT("ms: %s\n", ms_string);
+//////
+
   action_probs(player, view, probs);
+
+  ////////@todo
+  for (int i = 0; i < 3; ++i) {
+    DEBUG_PRINT("action %d: %lf\n", i, probs[i]);
+  }
+  ///////////
+
 
   double r = genrand_real2(&player->get_action_rng);
   enum ActionType i = a_fold;
@@ -502,110 +490,17 @@ void action_probs(
   assert(player);
   assert(probs);
 
-  uint8_t card = view.state.holeCards[view.viewingPlayer][0];
+  uint8_t card_rank = rankOfCard(view.state.holeCards[view.viewingPlayer][0]);
 
-  switch (view.viewingPlayer)
-  {
-  case 0:
-    action_probs_p0(card, &view.state, probs);
-    return;
-  case 1:
-    action_probs_p1(player->params, card, &view.state, probs);
-    return;
-  case 2:
-    action_probs_p2(player->params, card, &view.state, probs);
-    return;
-  default:
-    print_and_throw_error(
-        "kuhn_3p_equilibrium_player: action probabilities "
-        "requested for an out of bounds seat.\n"
-    );
-    return;
+  DEBUG_PRINT("action_probs: card rank: %u, "
+      "viewingPlayer: %u\n", card_rank, view.viewingPlayer);
+
+  if (0 == view.viewingPlayer) {
+    action_probs_p0(card_rank, &view.state, probs);
+  } else if (1 == view.viewingPlayer) {
+    action_probs_p1(player->params, card_rank, &view.state, probs);
+  } else {
+    action_probs_p2(player->params, card_rank, &view.state, probs);
   }
   return;
-
-//  if(view.viewingPlayer == 0)
-//  {
-//    if(view.state->num_actions[ 0 ] == 0) {
-//      /* We are in the case of <card><unknown_card> no actions */
-//      if(card == JACK) {
-//        action_probs[a_fold] = 0.0;
-//        action_probs[a_call] = 1.0 - uplayer>params[ ALPHA ];
-//        action_probs[a_raise] = uplayer>params[ALPHA];
-//      } else if(card == QUEEN) {
-//        action_probs[a_fold] = 0.0;
-//        action_probs[a_call] = 1.0;
-//        action_probs[a_raise] = 0.0;
-//      } else if(card == KING) {
-//        action_probs[a_fold] = 0.0;
-//        action_probs[a_call] = 1.0 - uplayer>params[ GAMMA ];
-//        action_probs[a_raise] = uplayer>params[ GAMMA ];
-//      } else {
-//        fprintf(stderr, "IMPOSSIBLE! Unhanded case\n");
-//        exit(-1);
-//      }
-//    } else {
-//      /* We are in the case of <card><unknown_card> pb */
-//      if(card == JACK) {
-//        action_probs[a_fold] = 1.0;
-//        action_probs[a_call] = 0.0;
-//        action_probs[a_raise] = 0.0;
-//      } else if(card == QUEEN) {
-//        action_probs[a_fold] = 1.0 - uplayer>params[ BETA ];
-//        action_probs[a_call] = uplayer>params[ BETA ];
-//        action_probs[a_raise] = 0.0;
-//      } else if(card == KING) {
-//        action_probs[a_fold] = 0.0;
-//        action_probs[a_call] = 1.0;
-//        action_probs[a_raise] = 0.0;
-//      } else {
-//        fprintf(stderr, "IMPOSSIBLE! Unhanded case\n");
-//        exit(-1);
-//      }
-//    }
-//  } else {
-//    /* Player 2 action probs*/
-//    /* We are in <unknown_card><card> pass */
-//    if(view.state->action[ 0 ][ 0 ] == a_call) {
-//      if(card == JACK) {
-//        action_probs[a_fold] = 0.0;
-//        action_probs[a_call] = 1.0 - uplayer>params[ XI ];
-//        action_probs[a_raise] = uplayer>params[ XI ];
-//      } else if(card == QUEEN) {
-//        action_probs[a_fold] = 0.0;
-//        action_probs[a_call] = 1.0;
-//        action_probs[a_raise] = 0.0;
-//      } else if(card == KING) {
-//        action_probs[a_fold] = 0.0;
-//        action_probs[a_call] = 0.0;
-//        action_probs[a_raise] = 1.0;
-//      } else {
-//        fprintf(stderr, "IMPOSSIBLE! Unhanded case\n");
-//        exit(-1);
-//      }
-//    } else {
-//      /* We are in <unknown_card><card> bet */
-//      if(card == JACK) {
-//        action_probs[a_fold] = 1.0;
-//        action_probs[a_call] = 0.0;
-//        action_probs[a_raise] = 0.0;
-//      } else if(card == QUEEN) {
-//        action_probs[a_fold] = 1.0 - uplayer>params[ ETA ];
-//        action_probs[a_call] = uplayer>params[ ETA ];
-//        action_probs[a_raise] = 0.0;
-//      } else if(card == KING) {
-//        action_probs[a_fold] = 0.0;
-//        action_probs[a_call] = 1.0;
-//        action_probs[a_raise] = 0.0;
-//      } else {
-//        fprintf(stderr, "IMPOSSIBLE! Unhanded case\n");
-//        exit(-1);
-//      }
-//    }
-//  }
 }
-
-///* player view of the game in the final state */
-//void game_over(MatchState view, uint32_t game_id, void *private_info)
-//{
-//}
