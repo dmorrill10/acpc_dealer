@@ -9,11 +9,19 @@
  *              parameters.
  */
 
+#include <limits.h>
+
 #include "game.h"
 #include "rng.h"
 #include "net.h"
 
 // Types ----------------
+typedef struct {
+  char host[HOST_NAME_MAX];
+  FILE *toServer;
+  FILE *fromServer;
+} dealer_connection_t;
+
 typedef enum {
   C11_INDEX = 0,
   B11_INDEX,

@@ -97,7 +97,7 @@ test: $(TEST1) $(TEST2) $(TEST3)
 # Clean
 #-----------------------------------
 clean:
-	rm -f $(TARGET) *.o *.il *.out $(TEST1) $(TEST2) $(TEST1_RUNNER) $(TEST2_RUNNER) $(THIS_DIR)/test/*.out
+	rm -f $(TARGET) *.o *.il *.out $(TEST1) $(TEST2) $(TEST3) $(TEST1_RUNNER) $(TEST2_RUNNER) $(TEST3_RUNNER) $(THIS_DIR)/test/*.out
 
 dist_clean: clean
 	rm -f *~ core

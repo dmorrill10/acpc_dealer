@@ -3,23 +3,18 @@ Copyright (C) 2013 by the Computer Poker Research Group, University of Alberta
 */
 
 #include <stdlib.h>
-
+#include <string.h>
 #include <assert.h>
-
-//#include <stdio.h>
-
-//#include <string.h>
-//#include <unistd.h>
-//#include <netdb.h>
-//#include <sys/socket.h>
-//#include <sys/time.h>
-//#include <netinet/in.h>
-//#include <netinet/tcp.h>
-//#include <getopt.h>
-//#include "game.h"
-//#include "rng.h"
-//#include "net.h"
-
+#include <stdio.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <sys/time.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include "game.h"
+#include "rng.h"
+#include "net.h"
 #include "kuhn_3p_equilibrium_player.h"
 #include "commander.h"
 
@@ -82,7 +77,6 @@ static void r(command_t *self) {
 static void game_def(command_t *self)
 {
   assert(self->data);
-  assert(self->arg);
 
   FILE* file = fopen(self->arg, "r");
   if( file == NULL ) {
@@ -100,6 +94,50 @@ static void game_def(command_t *self)
   fclose( file );
 }
 
+static void host(command_t *self)
+{
+  assert(self->data);
+
+  dealer_connection_t* dealer = self->data;
+
+  memset(dealer->host, 0, HOST_NAME_MAX * sizeof(*dealer->host));
+  strncpy(dealer->host, self->arg, HOST_NAME_MAX);
+}
+
+static void connect_to_dealer(command_t *self)
+{
+  assert(self->data);
+
+  dealer_connection_t* dealer = self->data;
+
+  printf("host: %s\n", dealer->host);
+
+  uint16_t port;
+  if( sscanf(self->arg, "%"SCNu16, &port) < 1 ) {
+    fprintf( stderr, "ERROR: invalid port %s\n", self->arg );
+    exit( EXIT_FAILURE );
+  }
+
+  int sock = connectTo(dealer->host, port);
+  if( sock < 0 ) {
+    exit( EXIT_FAILURE );
+  }
+  dealer->toServer = fdopen( sock, "w" );
+  dealer->fromServer = fdopen( sock, "r" );
+  if( dealer->toServer == NULL || dealer->fromServer == NULL ) {
+    fprintf( stderr, "ERROR: could not get socket streams\n" );
+    exit( EXIT_FAILURE );
+  }
+
+  /* send version string to dealer */
+  if( fprintf( dealer->toServer, "VERSION:%"PRIu32".%"PRIu32".%"PRIu32"\n",
+      VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION ) != 14 ) {
+    fprintf( stderr, "ERROR: could not get send version to server\n" );
+    exit( EXIT_FAILURE );
+  }
+  fflush(dealer->toServer);
+}
+
 int main( int argc, char **argv )
 {
   /* we make some assumptions about the actions - check them here */
@@ -110,13 +148,35 @@ int main( int argc, char **argv )
 
   Game *game;
   cmd.data = &game;
-
+// @todo Reorganize option ordering
   command_option(
       &cmd,
       "-g",
-      "--game <game def file name>",
+      "--game <file name>",
       "Game definition file name",
       game_def
+  );
+
+  dealer_connection_t dealer;
+
+  memset(dealer.host, 0, HOST_NAME_MAX * sizeof(*dealer.host));
+  strncpy(dealer.host, "localhost", HOST_NAME_MAX);
+  cmd.data = &dealer;
+
+  command_option(
+      &cmd,
+      "-h",
+      "--host [host name]",
+      "Name of the host on which dealer is running",
+      host
+  );
+
+  command_option(
+      &cmd,
+      "-p",
+      "--port <port number>",
+      "Port number to connect to dealer",
+      connect_to_dealer
   );
 
   double params[NUM_PARAMS] = {0};
@@ -140,7 +200,7 @@ int main( int argc, char **argv )
       r
   );
 
-  if( argc < 12 )
+  if( argc < 16 )
   {
     command_help(&cmd);
   }
@@ -148,13 +208,9 @@ int main( int argc, char **argv )
   command_parse(&cmd, argc, argv);
   command_free(&cmd);
 
-  int sock, len, r, a;
-  int32_t min, max;
-  uint16_t port;
+  int len, r, a;
   double p;
   MatchState state;
-  FILE *file, *toServer, *fromServer;
-  struct timeval tv;
   double probs[ NUM_ACTION_TYPES ];
   double actionProbs[ NUM_ACTION_TYPES ];
   rng_state_t rng;
@@ -166,32 +222,8 @@ int main( int argc, char **argv )
 //
   kuhn_3p_equilibrium_player_t player = init_private_info(game, params, seed);
 
-  /* connect to the dealer */
-  if( sscanf( argv[ 3 ], "%"SCNu16, &port ) < 1 ) {
-    fprintf( stderr, "ERROR: invalid port %s\n", argv[ 3 ] );
-    exit( EXIT_FAILURE );
-  }
-  sock = connectTo( argv[ 2 ], port );
-  if( sock < 0 ) {
-    exit( EXIT_FAILURE );
-  }
-  toServer = fdopen( sock, "w" );
-  fromServer = fdopen( sock, "r" );
-  if( toServer == NULL || fromServer == NULL ) {
-    fprintf( stderr, "ERROR: could not get socket streams\n" );
-    exit( EXIT_FAILURE );
-  }
-
-  /* send version string to dealer */
-  if( fprintf( toServer, "VERSION:%"PRIu32".%"PRIu32".%"PRIu32"\n",
-	       VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION ) != 14 ) {
-    fprintf( stderr, "ERROR: could not get send version to server\n" );
-    exit( EXIT_FAILURE );
-  }
-  fflush( toServer );
-
   /* play the game! */
-  while( fgets( line, MAX_LINE_LEN, fromServer ) ) {
+  while( fgets( line, MAX_LINE_LEN, dealer.fromServer ) ) {
     /* ignore comments */
     if( line[ 0 ] == '#' || line[ 0 ] == ';' ) {
       continue;
@@ -239,11 +271,11 @@ int main( int argc, char **argv )
     line[ len ] = '\n';
     ++len;
 
-    if( fwrite(line, 1, len, toServer) != len ) {
+    if( fwrite(line, 1, len, dealer.toServer) != len ) {
       fprintf( stderr, "ERROR: could not get send response to server\n" );
       exit(EXIT_FAILURE);
     }
-    fflush(toServer);
+    fflush(dealer.toServer);
   }
 
   return EXIT_SUCCESS;
