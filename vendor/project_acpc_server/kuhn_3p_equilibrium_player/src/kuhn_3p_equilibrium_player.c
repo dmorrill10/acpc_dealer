@@ -399,8 +399,7 @@ kuhn_3p_equilibrium_player_t init_private_info(
   kuhn_3p_equilibrium_player_t kuhn_3p_e_player;
 
   /* This player cannot be used outside of Kuhn poker */
-  if(!is_3p_kuhn_poker_game(game_def))
-  {
+  if(!is_3p_kuhn_poker_game(game_def)) {
     print_and_throw_error(
         "kuhn_3p_equilibrium_player used in non-Kuhn game\n"
     );
@@ -414,20 +413,16 @@ kuhn_3p_equilibrium_player_t init_private_info(
       0,
       NUM_PARAMS * sizeof(*kuhn_3p_e_player.params)
   );
-  for (size_t i = 0; i < NUM_PARAMS; ++i)
-  {
+  for (size_t i = 0; i < NUM_PARAMS; ++i) {
     kuhn_3p_e_player.params[i] = params[i];
   }
 
   kuhn_3p_e_player.seed = seed;
 
   CEXCEPTION_T e = 0;
-  Try
-  {
+  Try {
     check_params(&kuhn_3p_e_player);
-  }
-  Catch(e)
-  {
+  } Catch(e) {
     Throw(e);
   }
 
