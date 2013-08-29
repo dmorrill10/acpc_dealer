@@ -86,6 +86,19 @@ $(TEST3_RUNNER):
 $(TEST3): $(TARGET) $(TEST3_RUNNER)
 	$(BUILD_PREFIX) $(SYMBOLS) $(INC_DIRS) $(TARGET_SRC) $(PROJECT_SRC) $(TEST_SUPPORT_DIR)/test_helper.c $(UNITY_DIR)/src/unity.c $(TEST3_SRC) $(TEST3_RUNNER) $(LIBS) -o $(TEST3)
 
+# Test 4
+#-------------
+TEST4_BASE := $(TEST_BASE)_sub_family_3
+TEST4_SRC := $(TEST4_BASE).c
+TEST4 := $(TEST4_BASE)$(TEST_EXTENSION)
+TEST4_RUNNER := $(TEST4_BASE)_Runner.c
+
+$(TEST4_RUNNER):
+	ruby $(UNITY_DIR)/auto/generate_test_runner.rb $(TEST4_SRC) $(TEST4_RUNNER)
+
+$(TEST4): $(TARGET) $(TEST4_RUNNER)
+	$(BUILD_PREFIX) $(SYMBOLS) $(INC_DIRS) $(TARGET_SRC) $(PROJECT_SRC) $(TEST_SUPPORT_DIR)/test_helper.c $(UNITY_DIR)/src/unity.c $(TEST4_SRC) $(TEST4_RUNNER) $(LIBS) -o $(TEST4)
+
 # Manual test with the dealer
 #-------------------------------
 $(PROJECT_DIR)/dealer:
@@ -100,16 +113,17 @@ dealer_test: $(PROJECT_DIR)/dealer
 
 # Test
 #-----------------
-test: $(TEST1) $(TEST2) $(TEST3)
+test: $(TEST1) $(TEST2) $(TEST3) $(TEST4)
 	$(TEST1)
 	$(TEST2)
 	$(TEST3)
+	$(TEST4)
 
 
 # Clean
 #-----------------------------------
 clean:
-	rm -f $(TARGET) *.o *.il *.out $(TEST1) $(TEST2) $(TEST3) $(TEST1_RUNNER) $(TEST2_RUNNER) $(TEST3_RUNNER) $(THIS_DIR)/test/*.out
+	rm -f $(TARGET) *.o *.il *.out $(TEST1) $(TEST2) $(TEST3) $(TEST4) $(TEST1_RUNNER) $(TEST2_RUNNER) $(TEST3_RUNNER) $(TEST4_RUNNER) $(THIS_DIR)/test/*.out
 
 dist_clean: clean
 	rm -f *~ core

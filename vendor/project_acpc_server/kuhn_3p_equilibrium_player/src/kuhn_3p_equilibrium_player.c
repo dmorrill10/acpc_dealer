@@ -64,13 +64,14 @@ static bool is_3p_kuhn_poker_game(const Game const *game_def)
 static void check_c11_b11_and_b21(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player) {
   assert(kuhn_3p_e_player);
 
-  if (kuhn_3p_e_player->params[C11_INDEX] > 1/2.0)
-  {
+  if (kuhn_3p_e_player->params[C11_INDEX] > (1/2.0)) {
     print_and_throw_error(
         "kuhn_3p_equilibrium_player: c11 greater than 1/2\n"
     );
-  } else if (doublesAboutEqual(0.0, kuhn_3p_e_player->params[C11_INDEX])) {
-    if (kuhn_3p_e_player->params[B21_INDEX] > 1 / 4.0) {
+    return;
+  }
+  if (doublesAboutEqual(0.0, kuhn_3p_e_player->params[C11_INDEX])) {
+    if (kuhn_3p_e_player->params[B21_INDEX] > (1/4.0)) {
       print_and_throw_error(
           "kuhn_3p_equilibrium_player: b21 greater than 1/4\n"
       );
@@ -84,25 +85,36 @@ static void check_c11_b11_and_b21(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player) {
       );
     }
   } else {
-    if (kuhn_3p_e_player->params[B11_INDEX] > 1 / 4.0) {
+    if (kuhn_3p_e_player->params[B11_INDEX] > (1/4.0)) {
       print_and_throw_error(
           "kuhn_3p_equilibrium_player: b11 greater than 1/4\n"
       );
     }
-    if (kuhn_3p_e_player->params[C11_INDEX] < 1 / 2.0) {
-      kuhn_3p_e_player->params[B21_INDEX] =
-          kuhn_3p_e_player->params[B11_INDEX];
-    } else {
+    if (kuhn_3p_e_player->params[C11_INDEX] < (1/2.0)) {
       if (
-          kuhn_3p_e_player->params[B21_INDEX] > fmin(
-              kuhn_3p_e_player->params[B11_INDEX],
-              (1/2.0) - 2 * kuhn_3p_e_player->params[B11_INDEX]
+          kuhn_3p_e_player->params[B11_INDEX] > (1/6.0) && (
+            kuhn_3p_e_player->params[C11_INDEX] > (
+                  (2 - kuhn_3p_e_player->params[B11_INDEX]) /
+                  (3 + 4 * kuhn_3p_e_player->params[B11_INDEX])
+            )
           )
       ) {
         print_and_throw_error(
-            "kuhn_3p_equilibrium_player: b21 too large\n"
+            "kuhn_3p_equilibrium_player: c11 too large\n"
         );
       }
+
+      kuhn_3p_e_player->params[B21_INDEX] =
+          kuhn_3p_e_player->params[B11_INDEX];
+    } else if (
+        kuhn_3p_e_player->params[B21_INDEX] > fmin(
+            kuhn_3p_e_player->params[B11_INDEX],
+            (1/2.0) - 2 * kuhn_3p_e_player->params[B11_INDEX]
+        )
+    ) {
+      print_and_throw_error(
+          "kuhn_3p_equilibrium_player: b21 too large\n"
+      );
     }
   }
 }
@@ -142,7 +154,23 @@ static void check_c33(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player) {
       )
   ) {
     print_and_throw_error(
-        "kuhn_3p_equilibrium_player: c33 too large\n");
+        "kuhn_3p_equilibrium_player: c33 too large\n"
+    );
+  }
+}
+
+static void check_b23(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player) {
+  if (
+      kuhn_3p_e_player->params[B23_INDEX] > fmax(
+          0.0,
+          (
+              kuhn_3p_e_player->params[B11_INDEX] -
+              kuhn_3p_e_player->params[B21_INDEX]
+          ) /
+          (2 * (1.0 - kuhn_3p_e_player->params[B21_INDEX]))
+      )
+  ) {
+    print_and_throw_error("kuhn_3p_equilibrium_player: b23 too large\n");
   }
 }
 
@@ -152,14 +180,7 @@ static void check_params(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player)
 
   check_c11_b11_and_b21(kuhn_3p_e_player);
 
-  kuhn_3p_e_player->params[B23_INDEX] = fmax(
-      0.0,
-      (
-          kuhn_3p_e_player->params[B11_INDEX] -
-          kuhn_3p_e_player->params[B21_INDEX]
-      ) /
-      (2 * (1.0 - kuhn_3p_e_player->params[B21_INDEX]))
-  );
+  check_b23(kuhn_3p_e_player);
   kuhn_3p_e_player->params[B33_INDEX] = (
       (1 / 2.0) + (1 / 2.0)*(
           kuhn_3p_e_player->params[B11_INDEX] +
