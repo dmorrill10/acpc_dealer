@@ -17,5 +17,6 @@ typedef struct {
 } DealerConnection;
 
 DealerConnection new_dealer_connection();
+void connect_to_dealer(DealerConnection* this);
 
 #endif

@@ -13,8 +13,6 @@
 #include "rng.h"
 #include "net.h"
 
-#define DEBUG 0
-
 // Types ----------------
 typedef enum {
   C11_INDEX = 0,
@@ -28,7 +26,7 @@ typedef enum {
   C33_INDEX,
   C34_INDEX,
   NUM_PARAMS
-} parameter_index_t;
+} ParameterIndex;
 
 typedef struct {
   uint32_t seed;
@@ -37,9 +35,9 @@ typedef struct {
   double params[NUM_PARAMS];
 } Kuhn3pEquilibriumPlayer;
 
-typedef enum{JACK_RANK = 9, QUEEN_RANK, KING_RANK, ACE_RANK} card_rank_t;
+typedef enum{JACK_RANK = 9, QUEEN_RANK, KING_RANK, ACE_RANK} CardRank;
 
-typedef enum{A_POSITION = 0, B_POSITION, C_POSITION} position_t;
+typedef enum{A_POSITION = 0, B_POSITION, C_POSITION} PlayerPosition;
 
 // Constants -------------
 #define KUHN_SUIT 3

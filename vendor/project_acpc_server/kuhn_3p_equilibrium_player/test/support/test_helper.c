@@ -35,6 +35,7 @@ MatchState init_match_state(
     view.state.action[0][i].type = actions[i];
   }
   view.state.holeCards[position][0] = card;
+  view.state.round = 0;
 
   return view;
 }

@@ -20,11 +20,6 @@ void print_and_throw_error(const char const *message)
   fprintf(stderr, "ERROR: %s", message);
   Throw(1);
 }
-#define DEBUG_PRINT(...) \
-  if (DEBUG) { \
-    printf(__VA_ARGS__); \
-    fflush(NULL); \
-  }
 
 #include "kuhn_3p_equilibrium_player.h"
 
@@ -39,7 +34,7 @@ double beta(const Kuhn3pEquilibriumPlayer* kuhn_3p_e_player)
 
 /* Based on Unity's UnityAssertDoublesWithin function */
 static bool doublesAboutEqual(double d1, double d2) {
-    static const DOUBLE_PRECISION = 1e-12f;
+    static const double DOUBLE_PRECISION = 1e-12f;
 
     double diff = fabs(d2 - d1);
     double delta = fabs(d2 * DOUBLE_PRECISION);
@@ -230,8 +225,6 @@ static void action_probs_p0(
   size_t situation_index = 0;
 
   if (0 == state->numActions[0]) { // Situation 1
-    DEBUG_PRINT("action_probs_p0: situation 1\n");
-
     probs[a_fold] = 0.0;
     probs[a_call] = 1.0 - A[card_rank - JACK_RANK][0];
     probs[a_raise] = A[card_rank - JACK_RANK][0];
@@ -243,9 +236,6 @@ static void action_probs_p0(
   } else { // Situation 4
     situation_index = 3;
   }
-
-  DEBUG_PRINT("action_probs_p0: situation %u\n", situation_index);
-
   probs[a_fold] = 1.0 - A[card_rank - JACK_RANK][situation_index];
   probs[a_call] = A[card_rank - JACK_RANK][situation_index];
   probs[a_raise] = 0.0;
@@ -268,9 +258,6 @@ static void action_probs_p1(
   // Situation 1 or 2
   if (1 == state->numActions[0]) {
     if (a_call == state->action[0][0].type) { // Situation 1
-
-      DEBUG_PRINT("action_probs_p1: situation 1\n");
-
       if (JACK_RANK == card_rank) {
         param = params[B11_INDEX];
       } else if (QUEEN_RANK == card_rank) {
@@ -285,9 +272,6 @@ static void action_probs_p1(
       probs[a_raise] = param;
       return;
     } else { // Situation 2
-
-      DEBUG_PRINT("action_probs_p1: situation 2\n");
-
       if (JACK_RANK == card_rank) {
         param = B12;
       } else if (QUEEN_RANK == card_rank) {
@@ -300,9 +284,6 @@ static void action_probs_p1(
     }
   } else { // Situation 3 or 4
     if (a_fold == state->action[0][3].type) { // Situation 3
-
-      DEBUG_PRINT("action_probs_p1: situation 3\n");
-
       if (JACK_RANK == card_rank) {
         param = B13;
       } else if (QUEEN_RANK == card_rank) {
@@ -313,9 +294,6 @@ static void action_probs_p1(
         param = B43;
       }
     } else { // Situation 4
-
-      DEBUG_PRINT("action_probs_p1: situation 4\n");
-
       if (JACK_RANK == card_rank) {
         param = B14;
       } else if (QUEEN_RANK == card_rank) {
@@ -351,9 +329,6 @@ static void action_probs_p2(
   // Situation 1
   if (a_call == state->action[0][0].type) {
     if (a_call == state->action[0][1].type) { // Situation 1
-
-      DEBUG_PRINT("action_probs_p2: situation 1\n");
-
       if (JACK_RANK == card_rank) {
         param = params[C11_INDEX];
       } else if (QUEEN_RANK == card_rank) {
@@ -368,9 +343,6 @@ static void action_probs_p2(
       probs[a_raise] = param;
       return;
     } else { // Situation 2
-
-      DEBUG_PRINT("action_probs_p2: situation 2\n");
-
       if (JACK_RANK == card_rank) {
         param = C12;
       } else if (QUEEN_RANK == card_rank) {
@@ -383,9 +355,6 @@ static void action_probs_p2(
     }
   } else { // Situation 3 or 4
     if (a_fold == state->action[0][1].type) { // Situation 3
-
-      DEBUG_PRINT("action_probs_p2: situation 3\n");
-
       if (JACK_RANK == card_rank) {
         param = C13;
       } else if (QUEEN_RANK == card_rank) {
@@ -396,9 +365,6 @@ static void action_probs_p2(
         param = C4[2];
       }
     } else { // Situation 4
-
-      DEBUG_PRINT("action_probs_p2: situation 4\n");
-
       if (JACK_RANK == card_rank) {
         param = C14;
       } else if (QUEEN_RANK == card_rank) {
@@ -479,27 +445,13 @@ Action action(
 
   double probs[NUM_ACTION_TYPES];
   memset(probs, 0, NUM_ACTION_TYPES * sizeof(*probs));
-
-  ////////// @todo
-  DEBUG_PRINT("action: \n================\n");
-  char ms_string[255];
-  printMatchState(player->game_def, &view, 255, ms_string);
-  DEBUG_PRINT("ms: %s\n", ms_string);
-//////
-
   action_probs(player, view, probs);
 
-  ////////@todo
-  for (int i = 0; i < 3; ++i) {
-    DEBUG_PRINT("action %d: %lf\n", i, probs[i]);
-  }
-  ///////////
-
-
   double r = genrand_real2(&player->get_action_rng);
+
   enum ActionType i = a_fold;
-  for(; i < NUM_ACTION_TYPES; i++) {
-    if(r <= probs[i]) {
+  for (; i < NUM_ACTION_TYPES - 1; ++i) {
+    if (r <= probs[i]) {
       break;
     }
     r -= probs[i];
@@ -524,9 +476,6 @@ void action_probs(
 
   uint8_t card_rank = rankOfCard(view.state.holeCards[view.viewingPlayer][0]);
 
-  DEBUG_PRINT("action_probs: card rank: %u, "
-      "viewingPlayer: %u\n", card_rank, view.viewingPlayer);
-
   if (0 == view.viewingPlayer) {
     action_probs_p0(card_rank, &view.state, probs);
   } else if (1 == view.viewingPlayer) {
@@ -534,5 +483,6 @@ void action_probs(
   } else {
     action_probs_p2(player->params, card_rank, &view.state, probs);
   }
+
   return;
 }

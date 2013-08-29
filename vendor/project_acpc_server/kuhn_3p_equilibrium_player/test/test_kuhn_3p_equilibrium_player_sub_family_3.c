@@ -7,19 +7,22 @@
 #include "kuhn_3p_equilibrium_player.h"
 
 static int stderr_copy;
+static FILE* dev_null = NULL;
 void setUp()
 {
   // Silence error output
   stderr_copy = dup(fileno(stderr));
-  freopen("/dev/null", "w", stderr);
+  dev_null = freopen("/dev/null", "w", stderr);
 }
 
 void tearDown()
 {
-  // Restore error output
-  fflush(stderr);
-  dup2(stderr_copy, fileno(stderr));
-  close(stderr_copy);
+  if (dev_null) {
+    // Restore error output
+    fflush(stderr);
+    dup2(stderr_copy, fileno(stderr));
+    close(stderr_copy);
+  }
 }
 
 void test_params_set_properly()

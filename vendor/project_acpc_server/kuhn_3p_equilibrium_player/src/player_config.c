@@ -190,9 +190,9 @@ PlayerConfig new_player_config_from_argv(int argc, char** argv)
 
   command_option(
       &cmd,
-      "-h",
+      "-n",
       "--host [host name]",
-      "Name of the host on which dealer is running",
+      "Name of the host on which dealer is running (defaults to 'localhost')",
       get_host
   );
   command_option(
@@ -225,9 +225,9 @@ PlayerConfig new_player_config_from_argv(int argc, char** argv)
       r
   );
 
-  if( argc < 16 )
-  {
+  if( argc < 14 ) {
     command_help(&cmd);
+    exit(EXIT_SUCCESS);
   }
 
   PlayerConfig config = new_player_config();

@@ -20,12 +20,8 @@ int main(int argc, char **argv)
 
   connect_to_dealer(&config.dealer);
 
-  int len, r, a;
-  double p;
+  int len, r;
   MatchState state;
-  double probs[ NUM_ACTION_TYPES ];
-  double actionProbs[ NUM_ACTION_TYPES ];
-  rng_state_t rng;
   char line[ MAX_LINE_LEN ];
 
   Kuhn3pEquilibriumPlayer player = new_kuhn_3p_equilibrium_player(
@@ -60,12 +56,6 @@ int main(int argc, char **argv)
     /* add a colon (guaranteed to fit because we read a new-line in fgets) */
     line[ len ] = ':';
     ++len;
-
-    /* build the set of valid actions */
-    p = 0;
-    for( a = 0; a < NUM_ACTION_TYPES; ++a ) {
-      actionProbs[ a ] = 0.0;
-    }
 
     Action action_to_send = action(&player, state);
 
