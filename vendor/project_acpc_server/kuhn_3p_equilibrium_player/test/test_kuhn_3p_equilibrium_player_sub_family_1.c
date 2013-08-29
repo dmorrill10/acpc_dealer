@@ -38,7 +38,7 @@ void test_params_set_properly()
 
   Try
   {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -82,7 +82,7 @@ void test_b21_upper_bound()
 
   Try
   {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -111,7 +111,7 @@ void test_b11_upper_bound()
 
   Try
   {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -140,7 +140,7 @@ void test_b32_upper_bound()
 
   Try
   {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -169,7 +169,7 @@ void test_c33_lower_bound()
 
   Try
   {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -198,7 +198,7 @@ void test_c33_upper_bound()
 
   Try
   {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -227,7 +227,7 @@ void test_a24()
 
   Try
   {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -279,7 +279,7 @@ void test_a41()
 
   Try
   {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12

@@ -28,7 +28,27 @@ void print_and_throw_error(const char const *message)
 
 #include "kuhn_3p_equilibrium_player.h"
 
-bool is_3p_kuhn_poker_game(const Game const *game_def)
+double beta(const Kuhn3pEquilibriumPlayer* kuhn_3p_e_player)
+{
+  assert(kuhn_3p_e_player);
+
+  return fmax(
+      kuhn_3p_e_player->params[B11_INDEX], kuhn_3p_e_player->params[B21_INDEX]
+  );
+}
+
+/* Based on Unity's UnityAssertDoublesWithin function */
+static bool doublesAboutEqual(double d1, double d2) {
+    static const DOUBLE_PRECISION = 1e-12f;
+
+    double diff = fabs(d2 - d1);
+    double delta = fabs(d2 * DOUBLE_PRECISION);
+
+    //This first part of this condition will catch any NaN or Infinite values
+    return !((diff * 0.0 != 0.0) || (delta < diff));
+}
+
+static bool is_3p_kuhn_poker_game(const Game const *game_def)
 {
   assert(game_def);
   return (
@@ -41,133 +61,129 @@ bool is_3p_kuhn_poker_game(const Game const *game_def)
  );
 }
 
-double beta(double b11, double b21)
-{
-  return fmax(b11, b21);
-}
-
-size_t sub_family_number(double c11)
-{
-  for (size_t sub_family_index = 0; sub_family_index < NUM_SUB_FAMILIES - 1; ++sub_family_index)
-  {
-    if (c11 == SUB_FAMILY_DEFINING_PARAM_VALUES[sub_family_index])
-    {
-      // c11 is 0 or 1/2
-      return sub_family_index + 1;
-    }
-  }
-
-  if (c11 > SUB_FAMILY_DEFINING_PARAM_VALUES[NUM_SUB_FAMILIES - 2])
-  {
-    return NUM_SUB_FAMILIES + 1; // Illegal sub-family number
-  }
-
-  // c11 is between 0 and 1/2
-  return NUM_SUB_FAMILIES;
-}
-
-void check_family_1_params(
-    kuhn_3p_equilibrium_player_t* kuhn_3p_e_player
-)
-{
+static void check_c11_b11_and_b21(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player) {
   assert(kuhn_3p_e_player);
 
-  if (kuhn_3p_e_player->params[B21_INDEX] > 1/4.0)
+  if (kuhn_3p_e_player->params[C11_INDEX] > 1/2.0)
   {
     print_and_throw_error(
-        "kuhn_3p_equilibrium_player: b21 greater than 1/4\n"
+        "kuhn_3p_equilibrium_player: c11 greater than 1/2\n"
     );
+  } else if (doublesAboutEqual(0.0, kuhn_3p_e_player->params[C11_INDEX])) {
+    if (kuhn_3p_e_player->params[B21_INDEX] > 1 / 4.0) {
+      print_and_throw_error(
+          "kuhn_3p_equilibrium_player: b21 greater than 1/4\n"
+      );
+    }
+    if (
+        kuhn_3p_e_player->params[B11_INDEX] >
+        kuhn_3p_e_player->params[B21_INDEX]
+    ) {
+      print_and_throw_error(
+          "kuhn_3p_equilibrium_player: b11 greater than b21\n"
+      );
+    }
+  } else {
+    if (kuhn_3p_e_player->params[B11_INDEX] > 1 / 4.0) {
+      print_and_throw_error(
+          "kuhn_3p_equilibrium_player: b11 greater than 1/4\n"
+      );
+    }
+    if (kuhn_3p_e_player->params[C11_INDEX] < 1 / 2.0) {
+      kuhn_3p_e_player->params[B21_INDEX] =
+          kuhn_3p_e_player->params[B11_INDEX];
+    } else {
+      if (
+          kuhn_3p_e_player->params[B21_INDEX] > fmin(
+              kuhn_3p_e_player->params[B11_INDEX],
+              (1/2.0) - 2 * kuhn_3p_e_player->params[B11_INDEX]
+          )
+      ) {
+        print_and_throw_error(
+            "kuhn_3p_equilibrium_player: b21 too large\n"
+        );
+      }
+    }
   }
-  if (
-      kuhn_3p_e_player->params[B11_INDEX] >
-      kuhn_3p_e_player->params[B21_INDEX]
-  )
-  {
-    print_and_throw_error(
-        "kuhn_3p_equilibrium_player: b11 greater than b21\n"
-    );
-  }
+}
+
+static void check_b32(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player) {
+  assert(kuhn_3p_e_player);
+
   if (
       kuhn_3p_e_player->params[B32_INDEX] > (
-          (
-              2 + 3 * kuhn_3p_e_player->params[B11_INDEX] +
-              4 * kuhn_3p_e_player->params[B21_INDEX]
-          ) /
-          4.0
+          (1 / 2.0) + (3 / 4.0) * (
+              kuhn_3p_e_player->params[B11_INDEX] +
+              kuhn_3p_e_player->params[B21_INDEX]
+          ) + (beta(kuhn_3p_e_player) / 4.0)
       )
-  )
-  {
+  ) {
     print_and_throw_error(
-        "kuhn_3p_equilibrium_player: b32 too large for any sub-family 1 "
-        "equilibrium\n"
-    );
+        "kuhn_3p_equilibrium_player: b32 too large\n");
   }
+}
+
+static void check_c33(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player) {
+  assert(kuhn_3p_e_player);
+
   if (
       kuhn_3p_e_player->params[C33_INDEX] < (
-          (1/2.0) - kuhn_3p_e_player->params[B32_INDEX]
-      )
-  )
-  {
+          (1 / 2.0) - kuhn_3p_e_player->params[B32_INDEX])
+  ) {
     print_and_throw_error(
-        "kuhn_3p_equilibrium_player: c33 too small for any sub-family 1 "
-        "equilibrium\n"
-    );
+        "kuhn_3p_equilibrium_player: c33 too small\n");
   }
   if (
       kuhn_3p_e_player->params[C33_INDEX] > (
-          (1/2.0) - kuhn_3p_e_player->params[B32_INDEX] + (
-              3 * kuhn_3p_e_player->params[B11_INDEX] +
-              4 * kuhn_3p_e_player->params[B21_INDEX]
-          ) / 4.0
+          (1 / 2.0) - kuhn_3p_e_player->params[B32_INDEX] + (3 / 4.0) * (
+              kuhn_3p_e_player->params[B11_INDEX] +
+              kuhn_3p_e_player->params[B21_INDEX]
+          ) + (beta(kuhn_3p_e_player) / 4.0)
       )
-  )
-  {
+  ) {
     print_and_throw_error(
-        "kuhn_3p_equilibrium_player: c33 too large for any sub-family 1 "
-        "equilibrium\n"
-    );
+        "kuhn_3p_equilibrium_player: c33 too large\n");
   }
+}
 
-  kuhn_3p_e_player->params[B23_INDEX] = 0.0;
+static void check_params(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player)
+{
+  assert(kuhn_3p_e_player);
+
+  check_c11_b11_and_b21(kuhn_3p_e_player);
+
+  kuhn_3p_e_player->params[B23_INDEX] = fmax(
+      0.0,
+      (
+          kuhn_3p_e_player->params[B11_INDEX] -
+          kuhn_3p_e_player->params[B21_INDEX]
+      ) /
+      (2 * (1.0 - kuhn_3p_e_player->params[B21_INDEX]))
+  );
   kuhn_3p_e_player->params[B33_INDEX] = (
-      1 +
-      kuhn_3p_e_player->params[B11_INDEX] +
-      2 * kuhn_3p_e_player->params[B21_INDEX]
-  ) / 2.0;
+      (1 / 2.0) + (1 / 2.0)*(
+          kuhn_3p_e_player->params[B11_INDEX] +
+          kuhn_3p_e_player->params[B21_INDEX]
+      ) +
+      (beta(kuhn_3p_e_player) / 2.0) - kuhn_3p_e_player->params[B23_INDEX] * (
+          1 - kuhn_3p_e_player->params[B21_INDEX]
+      )
+  );
   kuhn_3p_e_player->params[B41_INDEX] = (
       2 * kuhn_3p_e_player->params[B11_INDEX] +
       2 * kuhn_3p_e_player->params[B21_INDEX]
   );
-  kuhn_3p_e_player->params[C21_INDEX] = 1/2.0;
-  return;
-}
 
-void check_params(kuhn_3p_equilibrium_player_t* kuhn_3p_e_player)
-{
-  assert(kuhn_3p_e_player);
+  check_b32(kuhn_3p_e_player);
+  check_c33(kuhn_3p_e_player);
 
-  switch (
-      sub_family_number(
-          kuhn_3p_e_player->params[SUB_FAMILY_DEFINING_PARAM_INDEX]
-      )
-  )
-  {
-  case 1:
-    check_family_1_params(kuhn_3p_e_player);
-    break;
-  case 2:
-//    check_family_2_params(kuhn_3p_e_player);
-    break;
-  case 3:
-//    check_family_3_params(kuhn_3p_e_player);
-    break;
-  default:
-    print_and_throw_error(
-        "kuhn_3p_equilibrium_player: c11 parameter outside of range for any "
-        "equilibrium sub-family\n"
-    );
-    return;
-  }
+  kuhn_3p_e_player->params[B41_INDEX] = (
+      2 * kuhn_3p_e_player->params[B11_INDEX] +
+      2 * kuhn_3p_e_player->params[B21_INDEX]
+  );
+  kuhn_3p_e_player->params[C21_INDEX] = (
+      (1 / 2.0) - kuhn_3p_e_player->params[C11_INDEX]
+  );
 
   for (size_t i = 0; i < NUM_PARAMS; ++i) {
     if (
@@ -182,7 +198,7 @@ void check_params(kuhn_3p_equilibrium_player_t* kuhn_3p_e_player)
   return;
 }
 
-void action_probs_p0(
+static void action_probs_p0(
     uint8_t card_rank,
     const State const* state,
     double* probs
@@ -216,7 +232,7 @@ void action_probs_p0(
   return;
 }
 
-void action_probs_p1(
+static void action_probs_p1(
     const double const* params,
     uint8_t card_rank,
     const State const* state,
@@ -298,7 +314,7 @@ void action_probs_p1(
   return;
 }
 
-void action_probs_p2(
+static void action_probs_p2(
     const double const* params,
     uint8_t card_rank,
     const State const* state,
@@ -387,7 +403,7 @@ void action_probs_p2(
 
 /* create any private space needed for future calls
    game_def is a private copy allocated by the dealer for the player's use */
-kuhn_3p_equilibrium_player_t init_private_info(
+Kuhn3pEquilibriumPlayer new_kuhn_3p_equilibrium_player(
     const Game const* game_def,
     const double const* params,
     uint32_t seed
@@ -396,7 +412,7 @@ kuhn_3p_equilibrium_player_t init_private_info(
   assert(game_def);
   assert(params);
 
-  kuhn_3p_equilibrium_player_t kuhn_3p_e_player;
+  Kuhn3pEquilibriumPlayer kuhn_3p_e_player;
 
   /* This player cannot be used outside of Kuhn poker */
   if(!is_3p_kuhn_poker_game(game_def)) {
@@ -434,7 +450,7 @@ kuhn_3p_equilibrium_player_t init_private_info(
 
 /* return a (valid!) action at the information state described by view */
 Action action(
-    kuhn_3p_equilibrium_player_t* player,
+    Kuhn3pEquilibriumPlayer* player,
     MatchState view
 )
 {
@@ -477,7 +493,7 @@ Action action(
    This is an extra function, and does _NOT_ need to be implemented
    to be considered a valid player.h interface. */
 void action_probs(
-    const kuhn_3p_equilibrium_player_t const* player,
+    const Kuhn3pEquilibriumPlayer const* player,
     MatchState view,
     double* probs
 )

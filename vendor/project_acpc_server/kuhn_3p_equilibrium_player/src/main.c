@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   rng_state_t rng;
   char line[ MAX_LINE_LEN ];
 
-  kuhn_3p_equilibrium_player_t player = init_private_info(
+  Kuhn3pEquilibriumPlayer player = new_kuhn_3p_equilibrium_player(
       config.game,
       config.params,
       config.seed

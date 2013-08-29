@@ -31,7 +31,7 @@ void test_init_private_info_throws_error_when_game_def_not_kuhn()
   Try
   {
     double params[NUM_PARAMS] = {0.1};
-    init_private_info(&game_def, params, 12);
+    new_kuhn_3p_equilibrium_player(&game_def, params, 12);
     TEST_FAIL_MESSAGE("Should Have Thrown An Error");
   }
   Catch(e)
@@ -44,19 +44,24 @@ void test_init_private_info_does_not_crash()
 {
   Game game_def = init_kuhn_poker_game_def();
 
+  double params[NUM_PARAMS] = {0};
+  params[C11_INDEX] = 0.0;
+  params[B11_INDEX] = 0.25;
+  params[B21_INDEX] = 0.25;
+  params[B32_INDEX] = 0.9375;
+  params[C33_INDEX] = 0.0;
+  params[C34_INDEX] = 1.0;
+
   CEXCEPTION_T e = 0;
 
-  Try
-  {
-    double params[NUM_PARAMS] = {0.1};
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+  Try {
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
     );
   }
-  Catch(e)
-  {
+  Catch(e) {
     TEST_FAIL_MESSAGE("Should Not Have Thrown An Error");
   }
 }
@@ -77,7 +82,7 @@ void test_out_of_bounds_c11_throws_error()
     params[C33_INDEX] = 0.0;
     params[C34_INDEX] = 1.0;
 
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -110,7 +115,7 @@ void test_param_invalid_probability_throws_error()
     {
       params[C34_INDEX] = invalid_param;
 
-      kuhn_3p_equilibrium_player_t patient = init_private_info(
+      Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
           &game_def,
           params,
           12
@@ -141,7 +146,7 @@ void test_action_probs_in_position_A()
   Try
   {
     // @todo Loop with a string (or strings) from each sub-family
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -260,7 +265,7 @@ void test_action_probs_in_position_B()
   Try
   {
     // @todo Loop with a string (or strings) from each sub-family
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -443,7 +448,7 @@ void test_action_probs_in_position_C()
   Try
   {
     // @todo Loop with a string (or strings) from each sub-family
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12

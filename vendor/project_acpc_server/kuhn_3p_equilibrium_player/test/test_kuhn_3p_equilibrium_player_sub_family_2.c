@@ -44,7 +44,7 @@ void test_params_set_properly()
 
   Try
   {
-    kuhn_3p_equilibrium_player_t patient = init_private_info(
+    Kuhn3pEquilibriumPlayer patient = new_kuhn_3p_equilibrium_player(
         &game_def,
         params,
         12
@@ -57,9 +57,6 @@ void test_params_set_properly()
     TEST_ASSERT_EQUAL_FLOAT(params[B32_INDEX], patient.params[B32_INDEX]);
     TEST_ASSERT_EQUAL_FLOAT(params[C33_INDEX], patient.params[C33_INDEX]);
     TEST_ASSERT_EQUAL_FLOAT(params[C34_INDEX], patient.params[C34_INDEX]);
-
-    // @todo Is this right?
-    TEST_ASSERT_EQUAL_FLOAT(0.0, patient.params[C34_INDEX]);
 
     TEST_ASSERT_EQUAL_FLOAT(12, patient.seed);
 

@@ -35,7 +35,7 @@ typedef struct {
   rng_state_t get_action_rng;
   const Game* game_def;
   double params[NUM_PARAMS];
-} kuhn_3p_equilibrium_player_t;
+} Kuhn3pEquilibriumPlayer;
 
 typedef enum{JACK_RANK = 9, QUEEN_RANK, KING_RANK, ACE_RANK} card_rank_t;
 
@@ -93,25 +93,19 @@ static const double A[][4] = {
 #define C32 0.0
 static const double C4[] = {1.0, 1.0, 1.0, 1.0};
 
-// Sub-family definitions
-#define NUM_SUB_FAMILIES 3
-#define SUB_FAMILY_DEFINING_PARAM_INDEX C11_INDEX
-static const double SUB_FAMILY_DEFINING_PARAM_VALUES[] = {0.0, 1/2.0};
-
 // Functions -----------------
-double beta(const double b11, const double b21);
-size_t sub_family_number(double c11);
-kuhn_3p_equilibrium_player_t init_private_info(
+double beta(const Kuhn3pEquilibriumPlayer* kuhn_3p_e_player);
+Kuhn3pEquilibriumPlayer new_kuhn_3p_equilibrium_player(
     const Game const* game_def,
     const double const* params,
     uint32_t seed
 );
 Action action(
-    kuhn_3p_equilibrium_player_t* player,
+    Kuhn3pEquilibriumPlayer* player,
     MatchState view
 );
 void action_probs(
-    const kuhn_3p_equilibrium_player_t const* player,
+    const Kuhn3pEquilibriumPlayer const* player,
     MatchState view,
     double* probs
 );
