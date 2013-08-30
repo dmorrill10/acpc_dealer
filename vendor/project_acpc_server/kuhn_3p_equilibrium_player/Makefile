@@ -2,7 +2,7 @@ THIS_DIR := $(CURDIR)/$(dir $(lastword $(MAKEFILE_LIST)))
 PROJECT_DIR := $(THIS_DIR)/../
 
 CC = gcc -std=gnu99
-CFLAGS = -O0 -g
+CFLAGS = -O3
 LIBS = -lm
 TARGET_SYMBOLS = -DCEXCEPTION_USE_CONFIG_FILE
 
