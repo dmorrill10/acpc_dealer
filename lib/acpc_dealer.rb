@@ -14,7 +14,8 @@ module AcpcDealer
     3 =>
     {
       limit: "#{DEALER_DIRECTORY}/holdem.limit.3p.game",
-      nolimit: "#{DEALER_DIRECTORY}/holdem.nolimit.3p.game"
+      nolimit: "#{DEALER_DIRECTORY}/holdem.nolimit.3p.game",
+      kuhn: "#{DEALER_DIRECTORY}/kuhn.limit.3p.game"
     }
   }
   DEALER_PATH = "#{DEALER_DIRECTORY}/dealer"
@@ -28,7 +29,8 @@ module AcpcDealer
     3 =>
     {
       limit: "#{DEALER_DIRECTORY}/example_player.limit.3p.sh",
-      nolimit: "#{DEALER_DIRECTORY}/example_player.nolimit.3p.sh"
+      nolimit: "#{DEALER_DIRECTORY}/example_player.nolimit.3p.sh",
+      kuhn: "#{DEALER_DIRECTORY}/kuhn_3p_equilibrium_player.sf1.sh"
     }
   }
 
