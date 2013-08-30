@@ -111,4 +111,3 @@ If you are creating your own game definitions, please note that game.h defines
 some constants for maximums in games (e.g., number of rounds).  These may need
 to be changed for games outside of the what is being run for the Annual
 Computer Poker Competition.
-
