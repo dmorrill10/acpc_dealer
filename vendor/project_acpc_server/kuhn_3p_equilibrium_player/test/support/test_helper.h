@@ -1,3 +1,7 @@
+/*
+Copyright (C) 2013 by the Computer Poker Research Group, University of Alberta
+*/
+
 #ifndef __TEST_HELPER__
 #define __TEST_HELPER__
 

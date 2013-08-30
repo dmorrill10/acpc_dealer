@@ -2,8 +2,8 @@
 Copyright (C) 2013 by the Computer Poker Research Group, University of Alberta
 */
 
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef __PLAYER_CONFIG_H__
+#define __PLAYER_CONFIG_H__
 
 #include "dealer_connection.h"
 #include "kuhn_3p_equilibrium_player.h"

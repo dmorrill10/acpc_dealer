@@ -1,3 +1,7 @@
+/*
+Copyright (C) 2013 by the Computer Poker Research Group, University of Alberta
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>

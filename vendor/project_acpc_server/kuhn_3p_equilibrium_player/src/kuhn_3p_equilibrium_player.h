@@ -1,13 +1,9 @@
-#ifndef KUHN_3P_EQUILIBRIUM_PLAYER_H
-#define KUHN_3P_EQUILIBRIUM_PLAYER_H
-/**
- * kuhn_3p_equilibrium_player.h
- * author:      Dustin Morrill (morrill@ualberta.ca)
- * date:        August 21, 2013
- * description: Player for 3-player Kuhn poker that plays according to an
- *              equilibrium component strategy specified by its given six
- *              parameters.
- */
+/*
+Copyright (C) 2013 by the Computer Poker Research Group, University of Alberta
+*/
+
+#ifndef __KUHN_3P_EQUILIBRIUM_PLAYER_H__
+#define __KUHN_3P_EQUILIBRIUM_PLAYER_H__
 
 #include "game.h"
 #include "rng.h"

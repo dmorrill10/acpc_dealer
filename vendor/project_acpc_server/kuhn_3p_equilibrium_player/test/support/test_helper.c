@@ -1,3 +1,7 @@
+/*
+Copyright (C) 2013 by the Computer Poker Research Group, University of Alberta
+*/
+
 #include "test_helper.h"
 
 Game init_kuhn_poker_game_def()

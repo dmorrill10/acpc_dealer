@@ -112,8 +112,3 @@ some constants for maximums in games (e.g., number of rounds).  These may need
 to be changed for games outside of the what is being run for the Annual
 Computer Poker Competition.
 
-==== Acknowledgements ====
-The included kuhn_3p_equilibrium_player project includes software developed for 
-the CEXCeption Project, by Mark VanderVoord and other 
-contributors, as well as the CMock and Unity Projects, by Mike Karlesky,
-Mark VanderVoord, and Greg Williams and other contributors.
