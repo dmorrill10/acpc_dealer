@@ -31,5 +31,5 @@ Acknowledgements
 ----------------
 This project includes software developed for 
 the CException Project, by Mark VanderVoord and other 
-contributors, as well as the CMock and Unity Projects, by Mike Karlesky,
+contributors, as well as the Unity Project, by Mike Karlesky,
 Mark VanderVoord, and Greg Williams and other contributors.

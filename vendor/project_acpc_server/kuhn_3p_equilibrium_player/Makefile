@@ -35,7 +35,6 @@ $(TARGET): $(TARGET_SRC) $(PROJECT_DIR)/evalHandTables $(PROJECT_DIR)/game.h $(P
 # Testing
 #===========
 UNITY_DIR := $(VENDOR_DIR)/unity
-CMOCK_DIR := $(VENDOR_DIR)/cmock
 TEST_DIR := $(THIS_DIR)/test
 TEST_SUPPORT_DIR := $(TEST_DIR)/support
 INC_DIRS := -I$(UNITY_DIR)/src -I$(TEST_SUPPORT_DIR) -I$(THIS_DIR)/src $(TARGET_INCLUDES)
