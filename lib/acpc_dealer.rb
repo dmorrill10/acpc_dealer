@@ -30,7 +30,9 @@ module AcpcDealer
     {
       limit: "#{DEALER_DIRECTORY}/example_player.limit.3p.sh",
       nolimit: "#{DEALER_DIRECTORY}/example_player.nolimit.3p.sh",
-      kuhn: "#{DEALER_DIRECTORY}/kuhn_3p_equilibrium_player.sf1.sh"
+      kuhn_sf1: "#{DEALER_DIRECTORY}/kuhn_3p_equilibrium_player.sf1.sh",
+      kuhn_sf2: "#{DEALER_DIRECTORY}/kuhn_3p_equilibrium_player.sf2.sh",
+      kuhn_sf3: "#{DEALER_DIRECTORY}/kuhn_3p_equilibrium_player.sf3.sh"
     }
   }
 
