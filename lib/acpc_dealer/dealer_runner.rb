@@ -1,6 +1,4 @@
-
 require 'socket'
-
 require 'process_runner'
 
 module AcpcDealer
@@ -23,6 +21,8 @@ module AcpcDealer
       # @note Should be specified as an option string that the dealer will understand.
       :options
     ]
+
+    Arguments = Struct.new(*DEALER_COMMAND_FORMAT)
 
     # @param [Array] dealer_arguments Arguments to the new dealer instance.
     # @param [String] log_directory The directory in which logs will be placed.
