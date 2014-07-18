@@ -12,7 +12,7 @@ Copyright (C) 2011 by the Computer Poker Research Group, University of Alberta
 #include <inttypes.h>
 
 
-#define READBUF_LEN 1024
+#define READBUF_LEN 4096
 #define NUM_PORT_CREATION_ATTEMPTS 10
 
 

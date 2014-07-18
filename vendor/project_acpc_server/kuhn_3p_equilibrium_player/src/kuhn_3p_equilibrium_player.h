@@ -5,9 +5,9 @@ Copyright (C) 2013 by the Computer Poker Research Group, University of Alberta
 #ifndef __KUHN_3P_EQUILIBRIUM_PLAYER_H__
 #define __KUHN_3P_EQUILIBRIUM_PLAYER_H__
 
-#include "game.h"
-#include "rng.h"
-#include "net.h"
+#include <game.h>
+#include <rng.h>
+#include <net.h>
 
 // Types ----------------
 typedef enum {
@@ -33,7 +33,7 @@ typedef struct {
 
 typedef enum{JACK_RANK = 9, QUEEN_RANK, KING_RANK, ACE_RANK} CardRank;
 
-typedef enum{A_POSITION = 0, B_POSITION, C_POSITION} PlayerPosition;
+typedef enum{A_POSITION = 0, B_POSITION, C_POSITION, NUM_PLAYERS} PlayerPosition;
 
 // Constants -------------
 #define KUHN_SUIT 3
@@ -41,6 +41,7 @@ typedef enum{A_POSITION = 0, B_POSITION, C_POSITION} PlayerPosition;
 #define QUEEN makeCard(QUEEN_RANK, KUHN_SUIT)
 #define KING makeCard(KING_RANK, KUHN_SUIT)
 #define ACE makeCard(ACE_RANK, KUHN_SUIT)
+#define NUM_CARDS 4
 
 #define KAPPA (1/24.0)
 
@@ -90,8 +91,8 @@ static const double C4[] = {1.0, 1.0, 1.0, 1.0};
 // Functions -----------------
 double beta(const Kuhn3pEquilibriumPlayer* kuhn_3p_e_player);
 Kuhn3pEquilibriumPlayer new_kuhn_3p_equilibrium_player(
-    const Game const* game_def,
-    const double const* params,
+    const Game* game_def,
+    const double* params,
     uint32_t seed
 );
 Action action(
@@ -99,7 +100,7 @@ Action action(
     MatchState view
 );
 void action_probs(
-    const Kuhn3pEquilibriumPlayer const* player,
+    const Kuhn3pEquilibriumPlayer* player,
     MatchState view,
     double* probs
 );

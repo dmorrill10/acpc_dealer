@@ -9,7 +9,7 @@ Copyright (C) 2013 by the Computer Poker Research Group, University of Alberta
 #include <math.h>
 #include <assert.h>
 
-#include "CException.h"
+#include <CException.h>
 void print_and_throw_error(const char const *message)
 {
   fprintf(stderr, "ERROR: %s", message);
@@ -211,7 +211,7 @@ static void check_params(Kuhn3pEquilibriumPlayer* kuhn_3p_e_player)
 
 static void action_probs_p0(
     uint8_t card_rank,
-    const State const* state,
+    const State* state,
     double* probs
 ) {
   assert(probs);
@@ -239,9 +239,9 @@ static void action_probs_p0(
 }
 
 static void action_probs_p1(
-    const double const* params,
+    const double* params,
     uint8_t card_rank,
-    const State const* state,
+    const State* state,
     double* probs
 ) {
   assert(params);
@@ -309,9 +309,9 @@ static void action_probs_p1(
 }
 
 static void action_probs_p2(
-    const double const* params,
+    const double* params,
     uint8_t card_rank,
-    const State const* state,
+    const State* state,
     double* probs
 )
 {
@@ -386,8 +386,8 @@ static void action_probs_p2(
 /* create any private space needed for future calls
    game_def is a private copy allocated by the dealer for the player's use */
 Kuhn3pEquilibriumPlayer new_kuhn_3p_equilibrium_player(
-    const Game const* game_def,
-    const double const* params,
+    const Game* game_def,
+    const double* params,
     uint32_t seed
 )
 {
@@ -461,7 +461,7 @@ Action action(
    This is an extra function, and does _NOT_ need to be implemented
    to be considered a valid player.h interface. */
 void action_probs(
-    const Kuhn3pEquilibriumPlayer const* player,
+    const Kuhn3pEquilibriumPlayer* player,
     MatchState view,
     double* probs
 )

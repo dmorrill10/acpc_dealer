@@ -19,17 +19,17 @@ DealerConnection new_dealer_connection()
   return this;
 }
 
-void connect_to_dealer(DealerConnection* this)
+void connect_to_dealer(DealerConnection* thisPtr)
 {
-  assert(this);
+  assert(thisPtr);
 
-  int sock = connectTo(this->host, this->port);
+  int sock = connectTo(thisPtr->host, thisPtr->port);
   if( sock < 0 ) {
     exit( EXIT_FAILURE );
   }
-  this->toServer = fdopen( sock, "w" );
-  this->fromServer = fdopen( sock, "r" );
-  if(!(this->toServer && this->fromServer)) {
+  thisPtr->toServer = fdopen( sock, "w" );
+  thisPtr->fromServer = fdopen( sock, "r" );
+  if(!(thisPtr->toServer && thisPtr->fromServer)) {
     fprintf( stderr, "ERROR: could not get socket streams\n" );
     exit( EXIT_FAILURE );
   }
@@ -37,7 +37,7 @@ void connect_to_dealer(DealerConnection* this)
   /* send version string to dealer */
   if(
       fprintf(
-          this->toServer,
+          thisPtr->toServer,
           "VERSION:%"PRIu32".%"PRIu32".%"PRIu32"\n",
           VERSION_MAJOR, VERSION_MINOR, VERSION_REVISION
       ) != 14
@@ -45,5 +45,5 @@ void connect_to_dealer(DealerConnection* this)
     fprintf( stderr, "ERROR: could not get send version to server\n" );
     exit(EXIT_FAILURE);
   }
-  fflush(this->toServer);
+  fflush(thisPtr->toServer);
 }

@@ -1,5 +1,6 @@
 require 'hand_evaluator'
 require "acpc_dealer/dealer_runner"
+require 'date'
 
 module AcpcDealer
   VENDOR_DIRECTORY = File.expand_path('../../vendor', __FILE__)
@@ -40,5 +41,19 @@ module AcpcDealer
     def initialize(port_number, host_name = 'localhost')
       super port_number, host_name
     end
+  end
+
+  def self.game_def_label(number_of_players, betting_type_key)
+    "#{number_of_players}P-#{betting_type_key}"
+  end
+
+  def self.default_match_name(players, game_def, seed)
+    "#{players.join('-')}.#{game_def}.r#{seed}.#{date}"
+  end
+
+  private
+
+  def self.date
+    "#{Date.today.strftime('%b%-d_%Y').downcase}"
   end
 end

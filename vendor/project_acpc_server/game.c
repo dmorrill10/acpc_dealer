@@ -1444,7 +1444,6 @@ static int printBoardCards( const Game *game, const State *state,
   return c;
 }
 
-
 static int readStateCommon( const char *string, const Game *game,
 			    State *state )
 {
