@@ -16,7 +16,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'process_runner', '~> 0.0'
   gem.add_dependency 'rake-compiler', '~> 0.8'
 
-  gem.add_development_dependency 'minitest', '~> 5.0.6'
+  gem.add_development_dependency 'minitest', '~> 5.0'
   gem.add_development_dependency 'mocha', '~> 0.13'
   gem.add_development_dependency 'awesome_print', '~> 1.0'
   gem.add_development_dependency 'simplecov', '~> 0.7'

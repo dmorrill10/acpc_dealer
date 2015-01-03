@@ -37,7 +37,7 @@ module AcpcDealer
       dealer_start_command = DEALER_COMMAND_FORMAT.inject([AcpcDealer::DEALER_PATH]) do |command, parameter|
         command += dealer_arguments[parameter].to_s.split
       end
-      dealer_start_command << ["-p", "#{port_numbers.join(',')}"] if port_numbers
+      dealer_start_command << "-p" << "#{port_numbers.join(',')}" if port_numbers
 
       unless log_directory
         log_directory = File.expand_path("../#{dealer_arguments[:match_name]}.logs", __FILE__)
