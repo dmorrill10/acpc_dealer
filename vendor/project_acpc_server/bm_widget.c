@@ -77,6 +77,13 @@ int main( int argc, char **argv )
   // than the Linux default.  What I've observed is that if a socket
   // connection is idle for long enough it gets dropped.  This only
   // happens for some users.
+  struct protoent *proto = getprotobyname("tcp");
+  if (proto == NULL) {
+    fprintf( stderr, "ERROR: Unable to get TCP protocol number.\n" );
+    exit( EXIT_FAILURE );
+  }
+  int level = proto->p_proto;
+
   int on = 1;
   if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &on, sizeof(on)) == -1) {
     fprintf( stderr, "ERROR: setsockopt failed; errno %i\n", errno );
@@ -84,21 +91,23 @@ int main( int argc, char **argv )
   }
   // Not sure what this should be
   int num_before_failure = 2;
-  if (setsockopt(sock, SOL_TCP, TCP_KEEPCNT, &num_before_failure,
+  if (setsockopt(sock, level, TCP_KEEPCNT, &num_before_failure,
 		 sizeof(num_before_failure)) == -1) {
     fprintf( stderr, "ERROR: setsockopt failed; errno %i\n", errno );
     exit( EXIT_FAILURE );
   }
+#ifdef TCP_KEEPIDLE
   // First check after 60 seconds
   int initial_secs = 60;
-  if (setsockopt(sock, SOL_TCP, TCP_KEEPIDLE, &initial_secs,
+  if (setsockopt(sock, level, TCP_KEEPIDLE, &initial_secs,
 		 sizeof(initial_secs)) == -1) {
     fprintf( stderr, "ERROR: setsockopt failed; errno %i\n", errno );
     exit( EXIT_FAILURE );
   }
+#endif
   // Thereafter, also check every 60 seconds
   int interval_secs = 60;
-  if (setsockopt(sock, SOL_TCP, TCP_KEEPINTVL, &interval_secs,
+  if (setsockopt(sock, level, TCP_KEEPINTVL, &interval_secs,
 		 sizeof(interval_secs)) == -1) {
     fprintf( stderr, "ERROR: setsockopt failed; errno %i\n", errno );
     exit( EXIT_FAILURE );
