@@ -10,7 +10,7 @@ Copyright (C) 2013 by the Computer Poker Research Group, University of Alberta
 #include <stdio.h>
 
 typedef struct {
-  char host[HOST_NAME_MAX];
+  char host[_POSIX_HOST_NAME_MAX];
   uint16_t port;
   FILE *toServer;
   FILE *fromServer;

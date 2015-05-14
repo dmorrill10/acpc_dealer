@@ -157,8 +157,9 @@ static void get_host(command_t *self)
 
   PlayerConfig* config = self->data;
 
-  memset(config->dealer.host, 0, HOST_NAME_MAX * sizeof(*config->dealer.host));
-  strncpy(config->dealer.host, self->arg, HOST_NAME_MAX);
+  memset(config->dealer.host, 0,
+         _POSIX_HOST_NAME_MAX * sizeof(*config->dealer.host));
+  strncpy(config->dealer.host, self->arg, _POSIX_HOST_NAME_MAX);
 }
 
 static void get_port(command_t *self)
