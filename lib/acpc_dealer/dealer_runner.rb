@@ -53,7 +53,7 @@ module AcpcDealer
     # => use to connect to the new dealer instance (key +:port_numbers+).
     # @raise (see ProcessRunner::go)
     # @raise (see FileUtils::mkdir_p)
-    def self.start(dealer_arguments, log_directory=nil, port_numbers=nil)
+    def self.start(dealer_arguments, log_directory=nil, port_numbers=nil, save_action_log=true)
       unless log_directory
         log_directory = File.expand_path("../#{dealer_arguments[:match_name]}.logs", __FILE__)
       end
@@ -61,15 +61,22 @@ module AcpcDealer
       FileUtils.mkdir_p log_directory unless Dir.exist?(log_directory)
 
       IO.pipe do |read_io, write_io|
-        pid = ProcessRunner.go(
-          command_components(dealer_arguments, port_numbers),
-          err: [
-            File.join(log_directory, "#{dealer_arguments[:match_name]}.actions.log"),
-            File::CREAT|File::WRONLY
-          ],
-          out: write_io,
-          chdir: log_directory
-        )
+        pid = if save_action_log
+          ProcessRunner.go(
+            command_components(dealer_arguments, port_numbers),
+            err: [
+              File.join(log_directory, "#{dealer_arguments[:match_name]}.actions.log"),
+              File::CREAT|File::WRONLY
+            ],
+            out: write_io,
+            chdir: log_directory
+          )
+        else
+          ProcessRunner.go(
+            command_components(dealer_arguments, port_numbers),
+            out: write_io,
+            chdir: log_directory
+          )
 
         {pid: pid, port_numbers: read_io.gets.split, log_directory: log_directory}
       end
