@@ -77,6 +77,7 @@ module AcpcDealer
             out: write_io,
             chdir: log_directory
           )
+        end
 
         {pid: pid, port_numbers: read_io.gets.split, log_directory: log_directory}
       end

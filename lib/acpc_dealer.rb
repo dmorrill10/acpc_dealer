@@ -1,4 +1,4 @@
-require 'version'
+require 'acpc_dealer/version'
 require 'hand_evaluator'
 require "acpc_dealer/dealer_runner"
 require 'date'
