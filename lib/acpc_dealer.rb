@@ -54,11 +54,22 @@ module AcpcDealer
     "#{players.join('-')}.#{game_def}.r#{seed}.#{date}"
   end
 
+  def self.process_exists?(pid)
+    begin
+      Process.getpgid pid
+      true
+    rescue Errno::ESRCH
+      false
+    end
+  end
+  def self.kill_process(pid) Process.kill('TERM', pid) end
+  def self.force_kill_process(pid) Process.kill('KILL', pid) end
+
   def self.dealer_running?(dealer_process_hash)
     (
       dealer_process_hash &&
       dealer_process_hash[:pid] &&
-      dealer_process_hash[:pid].process_exists?
+      process_exists?(dealer_process_hash[:pid])
     )
   end
 
@@ -80,7 +91,6 @@ module AcpcDealer
       end
     rescue Timeout::Error
     end
-
     return false
   end
 
