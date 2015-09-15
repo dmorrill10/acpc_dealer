@@ -2,6 +2,8 @@ require 'acpc_dealer/version'
 require 'hand_evaluator'
 require "acpc_dealer/dealer_runner"
 require 'date'
+require 'socket'
+require 'timeout'
 
 module AcpcDealer
   VENDOR_DIRECTORY = File.expand_path('../../vendor', __FILE__)
@@ -50,6 +52,36 @@ module AcpcDealer
 
   def self.default_match_name(players, game_def, seed)
     "#{players.join('-')}.#{game_def}.r#{seed}.#{date}"
+  end
+
+  def self.dealer_running?(dealer_process_hash)
+    (
+      dealer_process_hash &&
+      dealer_process_hash[:pid] &&
+      dealer_process_hash[:pid].process_exists?
+    )
+  end
+
+  # Thanks to joast and Chris Rice
+  # (http://stackoverflow.com/questions/517219/ruby-see-if-a-port-is-open)
+  # for this (modified)
+  def self.port_available?(port, ip = 'localhost')
+    begin
+      Timeout::timeout(1) do
+        begin
+          s = TCPSocket.new(ip, port)
+          s.close
+          return false
+        rescue Errno::EHOSTUNREACH
+          return false
+        rescue Errno::ECONNREFUSED
+          return true
+        end
+      end
+    rescue Timeout::Error
+    end
+
+    return false
   end
 
   private
