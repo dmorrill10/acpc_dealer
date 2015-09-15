@@ -25,20 +25,30 @@ module AcpcDealer
     Arguments = Struct.new(*DEALER_COMMAND_FORMAT)
 
     # @param [Array] dealer_arguments Arguments to the new dealer instance.
+    # @param [Array] port_numbers The port numbers to which each player will connect.
+    # => Defaults to the ACPC's default.
+    # @return [Hash] The process ID of the started dealer (key +:pid+) and the array of ports that players may
+    # => use to connect to the new dealer instance (key +:port_numbers+).
+    # @raise (see ProcessRunner::go)
+    # @raise (see FileUtils::mkdir_p)
+    def self.command(dealer_arguments, port_numbers=nil)
+      dealer_start_command = DEALER_COMMAND_FORMAT.inject([AcpcDealer::DEALER_PATH]) do |command_, parameter|
+        command_ += dealer_arguments[parameter].to_s.split
+      end
+      dealer_start_command << "-p" << "#{port_numbers.join(',')}" if port_numbers
+      dealer_start_command
+    end
+
+    # @param [Array] dealer_arguments Arguments to the new dealer instance.
     # @param [String] log_directory The directory in which logs will be placed.
     # => Defaults to +<dealer_arguments[:match_name]>.logs+.
     # @param [Array] port_numbers The port numbers to which each player will connect.
-    # => Defaults to random.
+    # => Defaults to the ACPC's default.
     # @return [Hash] The process ID of the started dealer (key +:pid+) and the array of ports that players may
     # => use to connect to the new dealer instance (key +:port_numbers+).
     # @raise (see ProcessRunner::go)
     # @raise (see FileUtils::mkdir_p)
     def self.start(dealer_arguments, log_directory=nil, port_numbers=nil)
-      dealer_start_command = DEALER_COMMAND_FORMAT.inject([AcpcDealer::DEALER_PATH]) do |command, parameter|
-        command += dealer_arguments[parameter].to_s.split
-      end
-      dealer_start_command << "-p" << "#{port_numbers.join(',')}" if port_numbers
-
       unless log_directory
         log_directory = File.expand_path("../#{dealer_arguments[:match_name]}.logs", __FILE__)
       end
@@ -47,7 +57,7 @@ module AcpcDealer
 
       IO.pipe do |read_io, write_io|
         pid = ProcessRunner.go(
-          dealer_start_command,
+          command(dealer_arguments, port_numbers),
           err: [
             File.join(log_directory, "#{dealer_arguments[:match_name]}.actions.log"),
             File::CREAT|File::WRONLY
