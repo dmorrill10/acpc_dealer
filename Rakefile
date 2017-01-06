@@ -45,6 +45,7 @@ namespace :compile do
 end
 
 namespace :clean do
+  desc 'Clean hand_evaluator'
   task :hand_evaluator do
     sh "rm -f #{File.expand_path('../lib/hand_evaluator.so')}"
   end
