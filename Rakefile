@@ -8,11 +8,17 @@ require 'rubygems/package_task'
 
 require File.expand_path('../lib/acpc_dealer/version', __FILE__)
 
-desc 'Build gem'
 task :default => :test
+
+desc 'Compile hand_evaluator and dealer'
 task :compile => ['compile:hand_evaluator', 'compile:dealer']
+
+desc 'Run tests'
 task :test => :compile
+
 task :build => :clean
+
+desc 'Remove compiled products'
 task :clean => ['clean:hand_evaluator', 'clean:dealer']
 
 Rake::TestTask.new do |t|
