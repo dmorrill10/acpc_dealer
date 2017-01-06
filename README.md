@@ -1,6 +1,8 @@
 ACPC Dealer
 ============
 
+[![Build Status](https://travis-ci.org/dmorrill10/acpc_dealer.svg?branch=master)](https://travis-ci.org/dmorrill10/acpc_dealer)
+
 The [Annual Computer Poker Competition Dealer][ACPC Dealer GitHub] gem wraps the [<em>ACPC Dealer Server</em>][ACPC competition server] in a handy gem with a convenient runner class, and a script for compiling and running the dealer and example players.
 
 ## Installation
@@ -17,15 +19,11 @@ Or install it yourself as:
 
     $ gem install acpc_dealer
 
-Then run (may need to restart your terminal first):
-
-    $ acpc_dealer --compile
-to compile the ACPC Dealer and example players.
 
 ## Usage
 
 Run
-    
+
     $ acpc_dealer -h
 to see a list of commands available in the command line interface.
 
@@ -45,9 +43,12 @@ See the [issue tracker](https://github.com/dmorrill10/acpc_dealer/issues) for cu
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
+Please test your changes, otherwise I may not be able to find the time to
+incorporate them into this project.
+
 Copyright
 ---------
-Copyright &copy; 2012 by the Computer Poker Research Group, University of Alberta. See [LICENSE](LICENSE.md) for details.
+Copyright &copy; 2012-2017 by the Computer Poker Research Group, University of Alberta. See [LICENSE](LICENSE.md) for details.
 
 
 <!---

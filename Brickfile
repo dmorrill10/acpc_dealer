@@ -1,0 +1,6 @@
+-
+  name: project_acpc_server
+  version: 41
+  location:
+    method: svn
+    url: http://www.computerpokercompetition.org/repos/project_acpc_server/trunk/

@@ -47,13 +47,22 @@ end
 namespace :clean do
   desc 'Clean hand_evaluator'
   task :hand_evaluator do
-    sh "rm -f #{File.expand_path('../lib/hand_evaluator.so')}"
+    Dir.chdir(File.expand_path('../ext/hand_evaluator', __FILE__)) do
+      begin
+        sh 'make clean'
+      rescue
+      end
+    end
+    sh "rm -f #{File.expand_path('../lib/hand_evaluator.so', __FILE__)}"
   end
 
   desc 'Clean ACPC dealer'
   task :dealer do
-    Dir.chdir(File.expand_path('../vendor/project_acpc_server', __FILE__)) do
-      sh "make clean"
+    begin
+      Dir.chdir(File.expand_path('../vendor/project_acpc_server', __FILE__)) do
+        sh "make clean"
+      end
+    rescue Errno::ENOENT
     end
   end
 end

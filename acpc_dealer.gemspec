@@ -15,6 +15,7 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'clive', '~> 1.2'
   gem.add_dependency 'process_runner', '~> 0.0'
   gem.add_dependency 'rake-compiler', '~> 0.8'
+  gem.add_dependency 'brick_and_mortar'
 
   gem.add_development_dependency 'minitest', '~> 5.0'
   gem.add_development_dependency 'mocha', '~> 0.13'
@@ -22,7 +23,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'simplecov', '~> 0.7'
 
   gem.files         = Dir.glob("lib/**/*") + Dir.glob("ext/**/*") + Dir.glob('*.gemspec') +
-    %w(Rakefile README.md) + Dir.glob('spec/**/*') + Dir.glob("vendor/**/*")
+    %w(Rakefile README.md Brickfile) + Dir.glob('spec/**/*')
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.extensions    = Dir.glob("ext/**/extconf.rb")
   gem.require_paths = ["lib"]

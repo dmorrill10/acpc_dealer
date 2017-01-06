@@ -31,6 +31,10 @@ class AcpcDealerCli < Clive
     game_def
   end
 
+  opt :v, :version, "Display version" do
+    puts AcpcDealer::VERSION
+  end
+
   command :compile, 'Compiles the ACPC Dealer program' do
     opt :c, :clean, 'Do a clean and full recompile' do
       print 'Cleaning...'
