@@ -9,13 +9,11 @@ require 'rubygems/package_task'
 require File.expand_path('../lib/acpc_dealer/version', __FILE__)
 
 desc 'Build gem'
-task :default => [:test]
-
-task :compile => ['dealer:clean', 'dealer:compile']
-
+task :default => :test
+task :compile => ['compile:hand_evaluator', 'compile:dealer']
 task :test => :compile
-
 task :build => :clean
+task :clean => ['clean:hand_evaluator', 'clean:dealer']
 
 Rake::TestTask.new do |t|
   t.libs << "lib" << 'spec/support'
@@ -28,23 +26,25 @@ def gemspec
   @clean_gemspec ||= eval(File.read(File.expand_path('../acpc_dealer.gemspec', __FILE__)))
 end
 
-Gem::PackageTask.new(gemspec) { |pkg| }
+Gem::PackageTask.new(gemspec)
 Rake::ExtensionTask.new('hand_evaluator', gemspec)
 
-task :clean => 'dealer:clean' do
-  sh "rm -f lib/hand_evaluator.so"
-end
-
-namespace :dealer do
+namespace :compile do
   desc 'Compile ACPC dealer'
-  task :compile do
+  task :dealer do
     Dir.chdir(File.expand_path('../vendor/project_acpc_server', __FILE__)) do
       sh "make"
     end
   end
+end
+
+namespace :clean do
+  task :hand_evaluator do
+    sh "rm -f #{File.expand_path('../lib/hand_evaluator.so')}"
+  end
 
   desc 'Clean ACPC dealer'
-  task :clean do
+  task :dealer do
     Dir.chdir(File.expand_path('../vendor/project_acpc_server', __FILE__)) do
       sh "make clean"
     end
