@@ -43,8 +43,8 @@ See the [issue tracker](https://github.com/dmorrill10/acpc_dealer/issues) for cu
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
 
-Please test your changes, otherwise I may not be able to find the time to
-incorporate them into this project.
+Please include tests with your changes, otherwise I may not be able to find 
+the time to incorporate them into this project.
 
 Copyright
 ---------
