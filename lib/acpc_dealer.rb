@@ -62,8 +62,17 @@ module AcpcDealer
       false
     end
   end
-  def self.kill_process(pid) Process.kill('TERM', pid) end
-  def self.force_kill_process(pid) Process.kill('KILL', pid) end
+  def self.kill_process(pid)
+    if pid && pid > 0
+      Process.kill('TERM', pid)
+    end
+  end
+
+  def self.force_kill_process(pid)
+    if pid && pid > 0
+      Process.kill('KILL', pid)
+    end
+  end
 
   def self.dealer_running?(dealer_process_hash)
     (
