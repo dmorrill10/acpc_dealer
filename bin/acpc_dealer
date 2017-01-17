@@ -155,10 +155,15 @@ class AcpcDealerCli < Clive
 
       host_name = if get(:host_name) then get(:host_name) else 'localhost' end
 
-      player = AcpcDealer::EXAMPLE_PLAYERS[number_of_players][betting_type]
-      players_directory = File.dirname(player)
-      FileUtils.cd players_directory
-      ProcessRunner.go [player, host_name, get(:port)]
+      Process.detach(
+        Process.spawn(
+          player,
+          host_name, get(:port),
+          chdir: File.dirname(
+            AcpcDealer::EXAMPLE_PLAYERS[number_of_players][betting_type]
+          )
+        )
+      )
 
       puts "Example player for #{number_of_players} player #{betting_type}, connected to dealer on #{host_name}:#{get(:port)}"
     end

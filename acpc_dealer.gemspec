@@ -13,7 +13,6 @@ Gem::Specification.new do |gem|
   gem.platform      = Gem::Platform::RUBY
 
   gem.add_dependency 'clive', '~> 1.2'
-  gem.add_dependency 'process_runner', '~> 0.0'
   gem.add_dependency 'rake-compiler', '~> 0.8'
   gem.add_dependency 'brick_and_mortar', '~> 0.1'
 

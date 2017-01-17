@@ -1,5 +1,4 @@
 require 'socket'
-require 'process_runner'
 
 module AcpcDealer
   class DealerRunner
@@ -29,10 +28,14 @@ module AcpcDealer
     # => Defaults to the ACPC Dealer's default.
     # @return [Array] The components of the ACPC Dealer command that would be run (the executable, followed by arguments)
     def self.command_components(dealer_arguments, port_numbers=nil)
-      dealer_start_command = DEALER_COMMAND_FORMAT.inject([AcpcDealer::DEALER_PATH]) do |command_, parameter|
+      dealer_start_command = DEALER_COMMAND_FORMAT.inject(
+        [AcpcDealer::DEALER_PATH]
+      ) do |command_, parameter|
         command_ += dealer_arguments[parameter].to_s.split
       end
-      dealer_start_command << "-p" << "#{port_numbers.join(',')}" if port_numbers
+      if port_numbers
+        dealer_start_command << "-p" << "#{port_numbers.join(',')}"
+      end
       dealer_start_command
     end
 
@@ -49,48 +52,59 @@ module AcpcDealer
     # => Defaults to +<dealer_arguments[:match_name]>.logs+.
     # @param [Array] port_numbers The port numbers to which each player will connect.
     # => Defaults to the ACPC's default.
-    # @return [Hash] The process ID of the started dealer (key +:pid+) and the array of ports that players may
-    # => use to connect to the new dealer instance (key +:port_numbers+).
-    # @raise (see ProcessRunner::go)
+    # @param [Boolean] save_action_log
+    # @param [Hash] options (see Process::spawn)
+    # @raise (see Process::detach)
+    # @raise (see Process::spawn)
     # @raise (see FileUtils::mkdir_p)
-    def self.start(dealer_arguments, log_directory=nil, port_numbers=nil, save_action_log=true)
-      unless log_directory
-        log_directory = File.expand_path("../#{dealer_arguments[:match_name]}.logs", __FILE__)
-      end
-
+    def self.start(
+      dealer_arguments,
+      log_directory=nil,
+      port_numbers=nil,
+      save_action_log=true,
+      options={}
+    )
+      log_directory ||= File.expand_path(
+        "../#{dealer_arguments[:match_name]}.logs",
+        __FILE__
+      )
       FileUtils.mkdir_p log_directory unless Dir.exist?(log_directory)
 
-      IO.pipe do |read_io, write_io|
-        pid = if save_action_log
-          ProcessRunner.go(
-            command_components(dealer_arguments, port_numbers),
-            err: [
-              File.join(log_directory, "#{dealer_arguments[:match_name]}.actions.log"),
-              File::CREAT|File::WRONLY
-            ],
-            out: write_io,
-            chdir: log_directory
-          )
-        else
-          ProcessRunner.go(
-            command_components(dealer_arguments, port_numbers),
-            out: write_io,
-            chdir: log_directory
-          )
-        end
+      options[:chdir] ||= log_directory
 
-        {pid: pid, port_numbers: read_io.gets.split, log_directory: log_directory}
+      IO.pipe do |read_io, write_io|
+        options[:out] ||= write_io
+        if save_action_log
+          options[:err] = [
+            File.join(
+              log_directory,
+              "#{dealer_arguments[:match_name]}.actions.log"
+            ),
+            File::CREAT|File::WRONLY
+          ]
+        end
+        pid = Process.detach(
+          Process.spawn(
+            *command_components(dealer_arguments, port_numbers),
+            options
+          )
+        ).pid
+
+        {
+          pid: pid,
+          port_numbers: read_io.gets.split.map(&:to_i),
+          log_directory: log_directory
+        }
       end
     end
 
-    # @todo How could ports be reserved without starting a server? Would +::ports_for_players+ even want to do this?
-
-    # @return [Array<Integer>] List of random open ports. Does NOT reserve the ports though,
-    # => so it's possible that the ports will come into use between calling this method and
-    # => using them.
+    # @return [Array<Integer>] List of arbitrary open ports.
+    # => Does NOT reserve the ports,
+    # => so it's possible that the ports will come into use between calling
+    # => this method and using them.
     def self.ports_for_players(number_of_players)
-      number_of_players.times.inject([]) do |ports, i|
-        ports << TCPServer.open('localhost', 0) { |s| s.addr[1] }
+      number_of_players.times.map do
+        TCPServer.open('localhost', 0) { |s| s.addr[1] }
       end
     end
   end
